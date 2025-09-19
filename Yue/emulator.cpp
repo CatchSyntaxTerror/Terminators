@@ -26,7 +26,7 @@ struct Segment {
 struct UM {
 
     u32 R[8] = {0};                 // Registers
-    std::vector<Segment> arrays;      // Memory segments //vector<vector<u32>> 每次索引都要解两层结构；还牵扯 capacity/size 语义。换成自管内存的段，元数据紧凑放在一起，访问更快。
+    std::vector<Segment> arrays;      // Memory segments 
     vector<u32> free_ids;            // Reusable segment IDs
     u32 pc = 0;                      // Program counter
     bool halted = false;             // Halt flag
@@ -127,7 +127,7 @@ struct UM {
     void run() {
         struct Decoded {
             uint8_t op, a, b, c;
-            u32 imm;  // 仅 op==13 有效
+            u32 imm;  
         };
 
         u32 r[8]; std::memcpy(r, R, sizeof(R));
@@ -136,8 +136,7 @@ struct UM {
         if (UNLIKELY(arrays.empty() || !arrays[0].active)) fail("program segment inactive");
         u32*   prog_ptr = arrays[0].data;
         size_t prog_len = arrays[0].len;
-
-        // 预解码表（局部）
+        
         std::vector<Decoded> dprog;
         dprog.resize(prog_len);
 
@@ -160,8 +159,7 @@ struct UM {
                 dprog[i] = d;
             }
         };
-
-        // 初次预解码
+        
         decode_prog(prog_ptr, prog_len);
         Decoded* dp = dprog.data();
 
@@ -248,11 +246,9 @@ struct UM {
                         arrays[0].len = src.len;
                         arrays[0].active = 1;
 
-                        // 更新代码指针
                         prog_ptr = arrays[0].data;
                         prog_len = arrays[0].len;
-
-                        // 关键：重建预解码表
+                        
                         decode_prog(prog_ptr, prog_len);
                         dp = dprog.data();
                     }
@@ -264,7 +260,6 @@ struct UM {
             }
         }
 
-        // flush 输出缓冲
         if (out_sz) {
             size_t n = fwrite(out_buf, 1, out_sz, stdout);
             if (n != out_sz) fail("output error");
