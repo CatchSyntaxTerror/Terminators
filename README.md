@@ -29,7 +29,7 @@ Typical workflow involves:
     time ./emulator sandmark.um
 
 ### Expected Results
-- On `b146` (Linux): Lower runtime due to stronger hardware  
+- On `b146` (x86-64): Lower runtime due to stronger hardware  
 - On `risc-machine-2` (RISC-V): Noticeably slower, reflecting architectural constraints  
 
 ## Example Benchmark Results
