@@ -1,0 +1,9 @@
+{- 
+ Simple Assignment Test
+ Confirms :=, sequencing, and using a value in another variable.
+ Author: Youssef Amin
+-}
+
+x := 42;
+y := x + 1;
+output := y
