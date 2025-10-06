@@ -1,0 +1,6 @@
+{-
+    z is an undefined varaible
+-}
+
+x := y;
+x := z;
