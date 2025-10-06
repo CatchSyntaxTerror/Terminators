@@ -1,0 +1,6 @@
+{-
+    missing od at end of while
+-}
+
+while [x < y] do
+  x := x + 1

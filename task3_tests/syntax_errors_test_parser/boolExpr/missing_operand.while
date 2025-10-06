@@ -1,0 +1,3 @@
+-- this program missing right operand after or
+
+if [x < y or ] then skip else skip fi

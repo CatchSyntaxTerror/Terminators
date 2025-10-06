@@ -1,0 +1,6 @@
+{-
+    this program is missing ";" between commands
+-}
+
+x := 3
+y := 4

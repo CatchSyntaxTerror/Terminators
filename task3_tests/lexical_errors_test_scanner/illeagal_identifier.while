@@ -1,0 +1,4 @@
+{-
+    identifier start with digit instead of letter
+-}
+1var := 5;

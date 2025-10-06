@@ -1,0 +1,7 @@
+{-
+    the while loop is missing keyword do
+-}
+
+while x < 5
+  y := y + 1
+od

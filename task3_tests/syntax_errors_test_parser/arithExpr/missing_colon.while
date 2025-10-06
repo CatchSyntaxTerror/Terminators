@@ -1,0 +1,5 @@
+{-
+    the assignment is missing ":"
+-}
+
+x = 3;

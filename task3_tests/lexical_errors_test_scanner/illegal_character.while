@@ -1,0 +1,5 @@
+{-
+    program contains illegal characters
+-}
+
+x := 3@;

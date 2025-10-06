@@ -1,0 +1,5 @@
+-- below program is missing a right bracket, syntax error
+
+while [x < 5 do
+  y := y + 1
+od
