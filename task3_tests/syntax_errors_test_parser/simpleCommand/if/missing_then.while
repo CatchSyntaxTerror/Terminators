@@ -1,0 +1,9 @@
+{-
+    missing then
+-}
+
+if [x < y]
+  x := y;
+else
+  z := 0
+fi

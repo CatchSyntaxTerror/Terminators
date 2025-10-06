@@ -1,0 +1,5 @@
+{-
+    missing left operand for -
+-}
+
+x := y;
