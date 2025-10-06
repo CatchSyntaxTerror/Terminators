@@ -10,28 +10,28 @@
 -}
 
 -- testing both types of comments here 
-
 n := in;
 
 if n > 100 then
-    y := 5;
+    y := 5
 else
-    if not[n <= 20] then
+    if not [n <= 20] then
         if n < 41 then
-            y := 1;
+            y := 1
         else
-            if [n > 80] and n <= 100 then
-                y := 4;
+            if [n > 80 and n <= 100] then
+                y := 4
             else
-                if [n < 51 or [n <= 60]] then
-                    y := 2;
+                if [n < 51 or n <= 60] then
+                    y := 2
                 else
-                    y := 3;
-                fi;
-            fi;
-        fi;
+                    y := 3
+                fi
+            fi
+        fi
     else
-        y := 0;
-    fi;
+        y := 0
+    fi
 fi;
-out := y;
+
+out := y
