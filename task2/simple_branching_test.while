@@ -8,10 +8,10 @@ y := 0;
 
 -- Todo: parser is expecting right paranthesis 
 -- and stops when it is less than symbol in (x < 10)
-if (x < 10) and not [x = 7] then
+if [x < 10] and not [x = 7] then
     y := 1
 else
-    if (x >= 10) or (x = 7) then
+    if [x >= 10] or [x = 7] then
         y := 2
     else
         y := 3
