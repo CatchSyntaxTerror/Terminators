@@ -1,0 +1,107 @@
+./while_parser task3_tests/lexical_errors_test_scanner/illeagal_identifier.while 
+PARSE ERROR (line 4): expected SimpleCommand (ID/if/while/skip) (lexeme='1')
+Parse failed.
+
+./while_parser task3_tests/lexical_errors_test_scanner/illegal_character.while      
+PARSE ERROR (line 5): expected token EOF, got INVALID (lexeme='@')
+Parse failed.
+
+./while_parser task3_tests/lexical_errors_test_scanner/unclosed_comment.while      
+PARSE ERROR (line 2): expected SimpleCommand (ID/if/while/skip) (lexeme='')
+Parse failed.
+
+./while_parser task3_tests/syntax_errors_test_parser/arithExpr/missing_operand_minus.while                  
+PARSE ERROR (line 5): expected Atom '(' or ID or NUM (lexeme=';')
+Parse failed.
+
+./while_parser task3_tests/syntax_errors_test_parser/arithExpr/missing_operand_minus.while                  
+PARSE ERROR (line 5): expected Atom '(' or ID or NUM (lexeme=';')
+Parse failed.
+
+./while_parser task3_tests/syntax_errors_test_parser/arithExpr/missing_operand_multi.while 
+PARSE ERROR (line 5): expected Atom '(' or ID or NUM (lexeme='*')
+Parse failed.
+
+./while_parser task3_tests/syntax_errors_test_parser/arithExpr/missing_operand_plus.while 
+PARSE ERROR (line 5): expected Atom '(' or ID or NUM (lexeme='+')
+Parse failed.
+
+./while_parser task3_tests/syntax_errors_test_parser/arithExpr/missing_parenthesis.while 
+PARSE ERROR (line 2): expected token RPAR, got SEMI (lexeme=';')
+Parse failed.
+
+./while_parser task3_tests/syntax_errors_test_parser/arithExpr/single_num_wParenthesis.while
+PARSE ERROR (line 1): expected SimpleCommand (ID/if/while/skip) (lexeme='')
+Parse failed.
+
+./while_parser task3_tests/syntax_errors_test_parser/boolExpr/missing_bracket.while         
+PARSE ERROR (line 3): expected token RBRACK, got DO (lexeme='do')
+Parse failed.
+
+./while_parser task3_tests/syntax_errors_test_parser/boolExpr/missing_brackets_not.while
+PARSE ERROR (line 1): expected Atom '(' or ID or NUM (lexeme='not')
+Parse failed.
+
+/while_parser task3_tests/syntax_errors_test_parser/boolExpr/missing_operand_and.while 
+PARSE ERROR (line 3): expected Atom '(' or ID or NUM (lexeme='and')
+Parse failed.
+
+./while_parser task3_tests/syntax_errors_test_parser/boolExpr/missing_operand_binary.while
+PARSE ERROR (line 1): expected token EOF, got GT (lexeme='>')
+Parse failed.
+
+./while_parser task3_tests/syntax_errors_test_parser/boolExpr/missing_operand_or.while    
+PARSE ERROR (line 3): expected Atom '(' or ID or NUM (lexeme=']')
+Parse failed.
+
+./while_parser task3_tests/syntax_errors_test_parser/command/missing_semicolon.while      
+PARSE ERROR (line 6): expected token EOF, got ID (lexeme='y')
+Parse failed.
+
+./while_parser task3_tests/syntax_errors_test_parser/simpleCommand/if/missing_else.while        
+PARSE ERROR (line 9): expected token ELSE, got FI (lexeme='fi')
+Parse failed.
+
+./while_parser task3_tests/syntax_errors_test_parser/simpleCommand/if/missing_fi.while  
+PARSE ERROR (line 7): expected SimpleCommand (ID/if/while/skip) (lexeme='else')
+Parse failed.
+
+./while_parser task3_tests/syntax_errors_test_parser/simpleCommand/if/missing_then.while
+PARSE ERROR (line 6): expected token THEN, got ID (lexeme='x')
+Parse failed.
+
+./while_parser task3_tests/syntax_errors_test_parser/simpleCommand/if/unfinished_body.while
+PARSE ERROR (line 2): expected Atom '(' or ID or NUM (lexeme='')
+Parse failed.
+
+./while_parser task3_tests/syntax_errors_test_parser/simpleCommand/while/missing_od.while 
+PARSE ERROR (line 7): expected token OD, got EOF (lexeme='')
+Parse failed.
+
+./while_parser task3_tests/syntax_errors_test_parser/simpleCommand/while/misspelled_keyword.while
+PARSE ERROR (line 3): expected token ASSIGN, got ID (lexeme='x')
+Parse failed.
+
+./while_parser task3_tests/syntax_errors_test_parser/simpleCommand/assign_floating_points.while       
+PARSE ERROR (line 1): expected token EOF, got INVALID (lexeme='.')
+Parse failed.
+
+./while_parser task3_tests/syntax_errors_test_parser/simpleCommand/assign_large_number.while   
+PARSE ERROR (line 1): expected SimpleCommand (ID/if/while/skip) (lexeme='')
+Parse failed.
+
+./while_parser task3_tests/syntax_errors_test_parser/simpleCommand/assign_negative_values.while
+PARSE ERROR (line 1): expected Atom '(' or ID or NUM (lexeme='-')
+Parse failed.
+
+./while_parser task3_tests/syntax_errors_test_parser/simpleCommand/assign_undefined_var.while  
+PARSE ERROR (line 6): expected SimpleCommand (ID/if/while/skip) (lexeme='')
+Parse failed.
+
+./while_parser task3_tests/syntax_errors_test_parser/simpleCommand/missing_colon.while       
+PARSE ERROR (line 5): expected token ASSIGN, got EQ (lexeme='=')
+Parse failed.
+
+./while_parser task3_tests/empty_program.while                                        
+PARSE ERROR (line 1): expected SimpleCommand (ID/if/while/skip) (lexeme='')
+Parse failed.

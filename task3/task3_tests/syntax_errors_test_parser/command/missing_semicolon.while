@@ -1,5 +1,5 @@
 {-
-    this program is missing ";" between commands
+    missing ";" between commands
 -}
 
 x := 3
