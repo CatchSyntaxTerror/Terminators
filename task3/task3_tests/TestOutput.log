@@ -103,4 +103,4 @@ PARSE ERROR (line 5): expected token ASSIGN, got EQ (lexeme='=')
 Parse failed.
 
 ./while_parser task3/task3_tests/empty_program.while
-ERROR (input file has no contents
+ERROR (input file has no contents)
