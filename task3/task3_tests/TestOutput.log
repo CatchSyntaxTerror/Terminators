@@ -6,8 +6,8 @@ Parse failed.
 PARSE ERROR (line 5): expected token EOF, got INVALID (lexeme='@')
 Parse failed.
 
-./while_parser task3_tests/lexical_errors_test_scanner/unclosed_comment.while      
-PARSE ERROR (line 2): expected SimpleCommand (ID/if/while/skip) (lexeme='')
+./while_parser task3/task3_tests/lexical_errors_test_scanner/unclosed_comment.while
+LEXICAL ERROR (line 1): comment needs closing bracket "-}"
 Parse failed.
 
 ./while_parser task3_tests/syntax_errors_test_parser/arithExpr/missing_operand_minus.while                  
@@ -102,6 +102,5 @@ Parse failed.
 PARSE ERROR (line 5): expected token ASSIGN, got EQ (lexeme='=')
 Parse failed.
 
-./while_parser task3_tests/empty_program.while                                        
-PARSE ERROR (line 1): expected SimpleCommand (ID/if/while/skip) (lexeme='')
-Parse failed.
+./while_parser task3/task3_tests/empty_program.while
+input file has no contents
