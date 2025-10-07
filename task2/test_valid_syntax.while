@@ -1,0 +1,23 @@
+{-
+This program tests the valid syntax for WHILE 
+includes arithmatic, while loop and if statment
+
+Author: Youssef Amin
+Input: inOutput: out
+-}
+
+-- inline comment wow :3
+
+x := in;
+y := ((x * 2) + 10) + 1;
+
+while [x < y] do
+    if [x < 10] then
+        x := x + 2
+    else
+        y := y - 2
+    fi
+od;
+
+out := x;
+output := out

@@ -207,13 +207,26 @@ private:
             }
             // block comment: {- ... -}
             if (c == '{' && pos + 1 < (int)s.size() && s[pos+1] == '-') {
-                pos += 2;
-                while (pos < (int)s.size()) {
-                    if (s[pos] == '\n') { ++line; ++pos; continue; }
-                    if (s[pos] == '-' && pos + 1 < (int)s.size() && s[pos+1] == '}') { pos += 2; break; }
-                    ++pos;
+                if (c == '{' && pos + 1 < (int)s.size() && s[pos+1] == '-') {
+                    int startLine = line; // remember where it started
+                    pos += 2;
+                    bool closed = false;
+                    while (pos < (int)s.size()) {
+                        if (s[pos] == '\n') { ++line; ++pos; continue; }
+                        if (s[pos] == '-' && pos + 1 < (int)s.size() && s[pos+1] == '}') { 
+                            pos += 2; 
+                            closed = true; 
+                            break; 
+                        }
+                        ++pos;
+                    }
+                    if (!closed) {
+                        ostringstream oss;
+                        oss << "LEXICAL ERROR (line " << startLine << "): comment needs closing bracket \"-}\"";
+                        throw runtime_error(oss.str());
+                    }
+                    continue;
                 }
-                continue;
             }
             break;
         }
@@ -515,6 +528,11 @@ int main(int argc, char** argv) {
         stringstream buffer; buffer << in.rdbuf(); code = buffer.str();
     } else {
         stringstream buffer; buffer << cin.rdbuf(); code = buffer.str();
+    }
+    
+    if (code.empty()) {
+        cerr << "input file has no contents\n";
+        return 1;
     }
 
     try {
