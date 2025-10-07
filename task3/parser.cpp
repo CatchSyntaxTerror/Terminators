@@ -208,7 +208,7 @@ private:
             // block comment: {- ... -}
             if (c == '{' && pos + 1 < (int)s.size() && s[pos+1] == '-') {
                 if (c == '{' && pos + 1 < (int)s.size() && s[pos+1] == '-') {
-                    int startLine = line; // remember where it started
+                    int startLine = line; 
                     pos += 2;
                     bool closed = false;
                     while (pos < (int)s.size()) {
@@ -531,7 +531,7 @@ int main(int argc, char** argv) {
     }
     
     if (code.empty()) {
-        cerr << "input file has no contents\n";
+        cerr << "ERROR (input file has no contents\n)";
         return 1;
     }
 
