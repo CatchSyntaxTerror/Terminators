@@ -1,0 +1,18 @@
+digraph AST {
+  node [shape=box, fontname="Courier"];
+  n1 [label="Program"];
+  n2 [label=";"];
+  n3 [label=":="];
+  n4 [label="Id(x)"];
+  n5 [label="Int(5)"];
+  n3 -> n4;
+  n3 -> n5;
+  n6 [label=":="];
+  n7 [label="Id(y)"];
+  n8 [label="Id(x)"];
+  n6 -> n7;
+  n6 -> n8;
+  n2 -> n3;
+  n2 -> n6;
+  n1 -> n2;
+}

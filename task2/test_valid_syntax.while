@@ -3,7 +3,8 @@ This program tests the valid syntax for WHILE
 includes arithmatic, while loop and if statment
 
 Author: Youssef Amin
-Input: inOutput: out
+Input: in
+Output: out
 -}
 
 -- inline comment wow :3
