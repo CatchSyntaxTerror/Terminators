@@ -74,7 +74,7 @@ namespace whilec
                 out << "  xori t0, t0, 1\n";
                 return;
             }
-            // b1 and|or b2  (eager)
+            // b1 and|or b2
             if (auto bb = dynamic_cast<const BBin *>(e))
             {
                 evalAExp(bb->left.get(), sym, out);
