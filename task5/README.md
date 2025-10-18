@@ -80,3 +80,27 @@ task5/      # Example .while programs and Makefile
 
 - C++17 compatible compiler (g++, clang++)
 - Optional: Graphviz for `make dot`
+
+## Run Assembly Code With c Tester on home machine
+### Install QEMU for RISC-V
+```
+sudo apt update
+sudo apt install qemu-user -y
+```
+### Compile and Run Tests
+```
+make run ARGS=tests/example1-factorial.while
+riscv64-linux-gnu-gcc -O2 -c out_program.s -o factorial.o
+riscv64-linux-gnu-gcc -static -O2 tests/test_factorial.c factorial.o -o factorial.elf
+qemu-riscv64 ./factorial.elf 5
+```
+```
+make run ARGS=tests/example13-fibonacci.while
+riscv64-linux-gnu-gcc -O2 -c out_program.s -o fibonacci.o
+riscv64-linux-gnu-gcc -static -O2 tests/test_fibonacci.c fibonacci.o -o fibonacci.elf
+qemu-riscv64 ./fibonacci.elf 10
+```
+### clean up repository
+```
+rm -f factorial.o fibonacci.o factorial.elf fibonacci.elf out_program.s ast.dot
+```

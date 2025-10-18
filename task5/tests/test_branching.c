@@ -1,6 +1,6 @@
 /**
  *    0: n, 1: in, 2: y, 3: out
- *  If your emitted label isn't 'program' you need to change the  label in
+ *  If your emitted label isn't 'program' you need to change the label in codegen_rv.cpp
  */
 
 #include <stdio.h>
