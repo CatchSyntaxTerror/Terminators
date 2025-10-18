@@ -1,0 +1,7 @@
+-- absolute value: abs(x) into y
+y := x;
+if [y < 0] then
+  y := 0 - y
+else
+  skip
+fi

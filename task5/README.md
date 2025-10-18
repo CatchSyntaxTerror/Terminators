@@ -55,6 +55,10 @@ Outputs:
 Optional PDF rendering (requires Graphviz):
  - `dot -Tpdf ast.dot -o ast.pdf`
 
+Test assembly code with main file
+-`gcc -O2 main_asm_tester.c asm_program.s -o wh`
+-`./wh args ...`
+
 ```bash
 make dot
 ```

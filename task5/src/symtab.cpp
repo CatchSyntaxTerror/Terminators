@@ -8,23 +8,30 @@ namespace whilec
 
     namespace
     {
-        void collectNames(const Node *n, std::unordered_set<std::string> &s)
+        void collectNamesOrdered(const Node *n,
+                                 std::vector<std::string> &names,
+                                 std::unordered_set<std::string> &seen)
         {
             if (!n)
                 return;
+
             if (auto p = dynamic_cast<const Program *>(n))
             {
-                collectNames(p->cmd.get(), s);
+                collectNamesOrdered(p->cmd.get(), names, seen);
             }
             else if (auto q = dynamic_cast<const Seq *>(n))
             {
-                collectNames(q->left.get(), s);
-                collectNames(q->right.get(), s);
+                collectNamesOrdered(q->left.get(), names, seen);
+                collectNamesOrdered(q->right.get(), names, seen);
             }
             else if (auto a = dynamic_cast<const Assign *>(n))
             {
-                s.insert(a->name);
-                collectNames(a->expr.get(), s);
+                if (!seen.count(a->name))
+                {
+                    names.push_back(a->name);
+                    seen.insert(a->name);
+                }
+                collectNamesOrdered(a->expr.get(), names, seen);
             }
             else if (dynamic_cast<const Skip *>(n))
             {
@@ -32,42 +39,43 @@ namespace whilec
             }
             else if (auto i = dynamic_cast<const If *>(n))
             {
-                collectNames(i->cond.get(), s);
-                collectNames(i->then_cmd.get(), s);
-                collectNames(i->else_cmd.get(), s);
+                collectNamesOrdered(i->cond.get(), names, seen);
+                collectNamesOrdered(i->then_cmd.get(), names, seen);
+                collectNamesOrdered(i->else_cmd.get(), names, seen);
             }
             else if (auto w = dynamic_cast<const While *>(n))
             {
-                collectNames(w->cond.get(), s);
-                collectNames(w->body.get(), s);
+                collectNamesOrdered(w->cond.get(), names, seen);
+                collectNamesOrdered(w->body.get(), names, seen);
             }
             else if (auto v = dynamic_cast<const Var *>(n))
             {
-                s.insert(v->name);
+                if (!seen.count(v->name))
+                {
+                    names.push_back(v->name);
+                    seen.insert(v->name);
+                }
             }
             else if (auto ab = dynamic_cast<const ABin *>(n))
             {
-                collectNames(ab->left.get(), s);
-                collectNames(ab->right.get(), s);
+                collectNamesOrdered(ab->left.get(), names, seen);
+                collectNamesOrdered(ab->right.get(), names, seen);
             }
             else if (auto nb = dynamic_cast<const Not *>(n))
             {
-                collectNames(nb->bexp.get(), s);
+                collectNamesOrdered(nb->bexp.get(), names, seen);
             }
             else if (auto bb = dynamic_cast<const BBin *>(n))
             {
-                collectNames(bb->left.get(), s);
-                collectNames(bb->right.get(), s);
+                collectNamesOrdered(bb->left.get(), names, seen);
+                collectNamesOrdered(bb->right.get(), names, seen);
             }
             else if (auto r = dynamic_cast<const Rel *>(n))
             {
-                collectNames(r->left.get(), s);
-                collectNames(r->right.get(), s);
+                collectNamesOrdered(r->left.get(), names, seen);
+                collectNamesOrdered(r->right.get(), names, seen);
             }
-            else
-            {
-                // Int/Bool or unknown: nothing
-            }
+            // Int, Bool, etc. — nothing to collect
         }
     }
 
@@ -81,18 +89,17 @@ namespace whilec
 
     SymbolTable buildSymbolTable(const Node &root)
     {
-        std::unordered_set<std::string> set;
-        collectNames(&root, set);
+        std::vector<std::string> ordered;
+        std::unordered_set<std::string> seen;
+        collectNamesOrdered(&root, ordered, seen);
 
         SymbolTable sym;
-        sym.names_.assign(set.begin(), set.end());
-        std::sort(sym.names_.begin(), sym.names_.end());
-        sym.names_.erase(std::unique(sym.names_.begin(), sym.names_.end()), sym.names_.end());
-
+        sym.names_ = std::move(ordered);
         for (int i = 0; i < (int)sym.names_.size(); ++i)
         {
             sym.toIndex_[sym.names_[i]] = i;
         }
+
         return sym;
     }
 

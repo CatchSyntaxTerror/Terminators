@@ -103,4 +103,32 @@ PARSE ERROR (line 5): expected token ASSIGN, got EQ (lexeme='=')
 Parse failed.
 
 ./while_parser task3/task3_tests/empty_program.while
-ERROR (input file has no contents)
+ERROR (input file has no contents) 
+
+youss@BOOK-KENENSBTBG:/mnt/c/Users/youss/coding_projects/C++Projects/Terminators/task5$ make run ARGS=tests/collatz.while
+g++ -std=c++17 -Isrc -MMD -MP -O2 -DNDEBUG -c src/codegen_rv.cpp -o build/codegen_rv.o
+g++ build/ast.o build/codegen_rv.o build/dot_emitter.o build/lexer.o build/main.o build/parser.o build/symtab.o -o bin/whilec 
+Built bin/whilec
+bin/whilec tests/collatz.while
+OK: parse succeeded.
+DOT written to ast.dot
+ASM written to out_program.s
+
+youss@BOOK-KENENSBTBG:/mnt/c/Users/youss/coding_projects/C++Projects/Terminators/task5$ riscv64-linux-gnu-gcc -static -O2 -c out_program.s -o example6.o
+youss@BOOK-KENENSBTBG:/mnt/c/Users/youss/coding_projects/C++Projects/Terminators/task5$ riscv64-linux-gnu-gcc -static -O2 tests/test_collatz.c example6.o -o example6.elf
+youss@BOOK-KENENSBTBG:/mnt/c/Users/youss/coding_projects/C++Projects/Terminators/task5$ qemu-riscv64 ./example6.elf 7 0 0 0 0 0
+
+Initial state:
+input=7
+n=0
+output=0
+quot=0
+rem=0
+steps=0
+Final state:
+input=7
+n=1
+output=16
+quot=1
+rem=0
+steps=16

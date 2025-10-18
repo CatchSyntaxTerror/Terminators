@@ -52,7 +52,7 @@ int main(int argc, char **argv)
 
         // output asm code
         auto sym = buildSymbolTable(*prog);
-        std::ofstream asmOut("asm_program.s");
+        std::ofstream asmOut("out_program.s");
         generate_riscv(*prog, sym, asmOut);
         std::cout << "ASM written to out_program.s\n";
         return 0;
