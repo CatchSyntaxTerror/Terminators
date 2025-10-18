@@ -174,8 +174,12 @@ namespace whilec
     void generate_riscv(const Program &prog, const SymbolTable &sym, std::ostream &out)
     {
         out << "  .text\n";
-        out << "  .globl example6\n";  
-        out << "example6:\n";
+        // use this for darkos collatz
+        // out << "  .globl example6\n";  
+        // out << "example6:\n";
+        //use this for all other test harnesses
+        out << "  .globl program\n";  
+        out << "program:\n";
         genCmd(prog.cmd.get(), sym, out);
         out << "  ret\n";
     }

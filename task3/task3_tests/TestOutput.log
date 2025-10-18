@@ -132,3 +132,41 @@ output=16
 quot=1
 rem=0
 steps=16
+
+
+youss@BOOK-KENENSBTBG:/mnt/c/Users/youss/coding_projects/C++Projects/Terminators/task5$ qemu-riscv64 ./bucket.elf 5
+Initial state (n,in,y,out):
+0 5 0 0
+Final state (n,in,y,out):
+5 5 0 0
+Bucket (out) = 0
+youss@BOOK-KENENSBTBG:/mnt/c/Users/youss/coding_projects/C++Projects/Terminators/task5$ qemu-riscv64 ./bucket.elf 25
+Initial state (n,in,y,out):
+0 25 0 0
+Final state (n,in,y,out):
+25 25 1 1
+Bucket (out) = 1
+youss@BOOK-KENENSBTBG:/mnt/c/Users/youss/coding_projects/C++Projects/Terminators/task5$ qemu-riscv64 ./bucket.elf 45
+Initial state (n,in,y,out):
+0 45 0 0
+Final state (n,in,y,out):
+45 45 4 4
+Bucket (out) = 4
+youss@BOOK-KENENSBTBG:/mnt/c/Users/youss/coding_projects/C++Projects/Terminators/task5$ qemu-riscv64 ./bucket.elf 65
+Initial state (n,in,y,out):
+0 65 0 0
+Final state (n,in,y,out):
+65 65 4 4
+Bucket (out) = 4
+youss@BOOK-KENENSBTBG:/mnt/c/Users/youss/coding_projects/C++Projects/Terminators/task5$ qemu-riscv64 ./bucket.elf 90
+Initial state (n,in,y,out):
+0 90 0 0
+Final state (n,in,y,out):
+90 90 4 4
+Bucket (out) = 4
+youss@BOOK-KENENSBTBG:/mnt/c/Users/youss/coding_projects/C++Projects/Terminators/task5$ qemu-riscv64 ./bucket.elf 150 
+Initial state (n,in,y,out):
+0 150 0 0
+Final state (n,in,y,out):
+150 150 5 5
+Bucket (out) = 5
