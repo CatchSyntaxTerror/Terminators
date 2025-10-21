@@ -68,3 +68,34 @@ clean:
 
 # include auto-generated dependencies
 -include $(DEPS)
+
+# GoogleTest (in third_party/googletest)
+GTEST_DIR    := ../third_party/googletest/googletest
+GTEST_INC    := $(GTEST_DIR)/include
+GTEST_SRC    := $(GTEST_DIR)/src/gtest-all.cc
+
+GTEST_BUILD_DIR := $(BUILD_DIR)/gtest
+GTEST_OBJS      := $(GTEST_BUILD_DIR)/gtest-all.o
+GTEST_LIB       := $(GTEST_BUILD_DIR)/libgtest.a
+
+# compile gtest's single translation unit
+$(GTEST_BUILD_DIR)/gtest-all.o: $(GTEST_SRC)
+	@mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) -isystem $(GTEST_INC) -I$(GTEST_DIR) -c $< -o $@
+
+# static archive
+$(GTEST_LIB): $(GTEST_OBJS)
+	@mkdir -p $(dir $@)
+	ar rcs $@ $^
+
+# test binary
+TEST_BIN := $(BIN_DIR)/unit_tests
+TEST_SRCS := tests/test_codegen.cpp
+
+$(TEST_BIN): all $(GTEST_LIB) $(TEST_SRCS)
+	@mkdir -p $(BIN_DIR)
+	$(CXX) $(CXXFLAGS) -isystem $(GTEST_INC) $(TEST_SRCS) $(GTEST_LIB) -lpthread -o $@
+
+.PHONY: test
+test: $(TEST_BIN)
+	$(TEST_BIN)
