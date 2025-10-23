@@ -1,0 +1,13 @@
+-- nested loops: O(n^2)
+i := input;
+j := input;
+sum := 0;
+while i > 0 do
+  k := j;
+  while k > 0 do
+    sum := sum + 1;
+    k := k - 1
+  od;
+  i := i - 1
+od;
+output := sum

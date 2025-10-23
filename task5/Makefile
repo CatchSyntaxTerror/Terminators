@@ -99,3 +99,9 @@ $(TEST_BIN): all $(GTEST_LIB) $(TEST_SRCS)
 .PHONY: test
 test: $(TEST_BIN)
 	$(TEST_BIN)
+.PHONY: clean-test
+clean-test:
+	$(RM) -f wh out_program.s
+	@if [ -d "build/tests" ]; then \
+	  $(RM) -r build/tests; \
+	fi

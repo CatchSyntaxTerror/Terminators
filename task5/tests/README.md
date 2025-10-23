@@ -11,7 +11,7 @@
   The test harness:
   - Automatically discovers all `.while` programs from:
     - `task5/tests/`
-    - and recursively from `../task3/`
+    - and `task3/`
   - Compiles each file with the compiler `./bin/whilec`
   - Verifies that the generated RISC-V assembly (`out_program.s`) contains expected instruction patterns
   - Reports each `.while` file as a **separate GTest test case**, with its own runtime and result.
@@ -34,26 +34,55 @@ make test     # builds and runs all gtest cases
 ## Clean Up Repository
 ```bash
 make clean
+make clean-test
 ```
 
 ## Interpreting GTest Output
 ```bash
-AllWhileFiles/WhileFileTest.GenerateAsmAndSanityCheck/33 (300 ms)
+AllWhileFiles/WhileFileTest.GenerateAsmAndSanityCheck/stress_loop_countdown (25 ms)
 ```
-- AllWhileFiles → test suite prefix
+- AllWhileFiles/WhileFileTest → test suite
 
-- WhileFileTest.GenerateAsmAndSanityCheck → fixture and test name
+- GenerateAsmAndSanityCheck → test function name
 
-- /33 → index of the .while file (see below to show filenames)
+- /stress_loop_countdown → name of the .while file
 
-- (300 ms) → time spent compiling and validating that specific .while file
+- (25 ms) → time spent compiling and validating this .while file
 
 ### To list all test names:
 ```bash
 ./bin/unit_tests --gtest_list_tests
 ```
 
-### To run a single test:
+### To run a single test - stress_nested_loop.while:
 ```bash
-./bin/unit_tests --gtest_filter="*GenerateAsmAndSanityCheck/*[Any number from 0 to 36]*"
+./bin/unit_tests --gtest_filter=*/stress_nested_loop
+
+gcc -O2 -o wh build/tests/stress_nested_loop.c build/tests/stress_nested_loop.s
+
+./wh 100000
+```
+#### Output of the example:
+```bash
+Initial state:
+v0=0
+v1=100000
+v2=0
+v3=0
+v4=0
+v5=0
+Final state:
+v0=0
+v1=100000
+v2=100000
+v3=10000000000
+v4=0
+v5=10000000000
+```
+### To time on Risc V:
+```bash
+time ./wh 100000
+real    1m16.376s
+user    1m16.347s
+sys     0m0.017s
 ```

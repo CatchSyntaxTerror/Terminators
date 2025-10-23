@@ -1,0 +1,11 @@
+-- gcd by repeated subtraction
+a := input;
+b := input2;
+while not [a=0] do
+  if a >= b then
+    a := a - b
+  else
+    b := b - a
+  fi
+od;
+output := b
