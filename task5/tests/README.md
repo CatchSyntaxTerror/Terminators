@@ -54,7 +54,8 @@ AllWhileFiles/WhileFileTest.GenerateAsmAndSanityCheck/stress_loop_countdown (25 
 ./bin/unit_tests --gtest_list_tests
 ```
 
-### To run a single test - stress_nested_loop.while:
+## stress test on Risc V:
+### To compile and run a single test - stress_nested_loop.while:
 ```bash
 ./bin/unit_tests --gtest_filter=*/stress_nested_loop
 
@@ -85,4 +86,35 @@ time ./wh 100000
 real    1m16.376s
 user    1m16.347s
 sys     0m0.017s
+```
+
+### stress_gcd_sub
+```bash
+time ./wh 1 100000000
+real    0m0.959s
+user    0m0.949s
+sys     0m0.009s
+```
+
+### stress_prime_count
+```bash
+time ./wh 10000
+real    0m3.321s
+user    0m3.309s
+sys     0m0.000s
+```
+## stress_factorial_addition:
+```bash
+time ./wh 12
+real    0m2.960s
+user    0m2.954s
+sys     0m0.004s
+```
+
+## stress_factorial_addition:
+```bash
+time ./wh 13
+real    0m38.434s
+user    0m38.426s
+sys     0m0.000s
 ```
