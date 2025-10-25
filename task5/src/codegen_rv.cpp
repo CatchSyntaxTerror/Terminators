@@ -169,14 +169,16 @@ namespace whilec
             throw std::runtime_error("Unexpected node in command position");
         }
 
-    } // anon
+    } 
 
     void generate_riscv(const Program &prog, const SymbolTable &sym, std::ostream &out)
     {
         out << "  .text\n";
+        
         // use this for darkos collatz
         // out << "  .globl example6\n";  
         // out << "example6:\n";
+
         //use this for all other test harnesses
         out << "  .globl program\n";  
         out << "program:\n";
