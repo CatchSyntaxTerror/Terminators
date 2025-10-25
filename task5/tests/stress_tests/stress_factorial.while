@@ -1,4 +1,5 @@
--- factorial of x into output
+-- factorial: simulate multiplication by repeated addition to increase workload
+-- notice that for a input greater than 13, the workload grows extremely fast
 x := input;
 y := x;
 z := 1;  

@@ -1,0 +1,16 @@
+{- gcd by modularizing: consecutive numbers as inputs to show the performance
+ e.g. Fib(40)=102334155 and Fib(40)+1=102334156
+ Compared to the repeated-subtraction,
+  for the close inputs, this version runs slower because of the extra nesting -}
+a := input;
+b := input2;
+while not [a=0] do
+  while b >= a do
+    b := b - a
+  od;
+  -- swap a,b: gcd(a,b) == gcd(b,a)
+  t := a;
+  a := b;
+  b := t
+od;
+output := b

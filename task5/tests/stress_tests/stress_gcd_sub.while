@@ -1,9 +1,11 @@
--- gcd by repeated subtraction
+{- gcd by repeated subtraction: unbalance the input to show the performance
+ e.g. 1 and 10000, this way will forces many subtractions up front 
+ and generates a much heavier workload.-}
 a := input;
 b := input2;
 while not [a=0] do
   if a >= b then
-    a := a - b
+    a := a - b	-- with unbalance inputs this repeats many times
   else
     b := b - a
   fi

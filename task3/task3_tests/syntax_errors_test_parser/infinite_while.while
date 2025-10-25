@@ -1,0 +1,5 @@
+-- infinite while loops
+
+while 1>0 do
+  skip
+od
