@@ -90,7 +90,7 @@ $(GTEST_LIB): $(GTEST_OBJS)
 
 # test binary
 TEST_BIN := $(BIN_DIR)/unit_tests
-TEST_SRCS := tests/test_codegen.cpp
+TEST_SRCS := tests/auto_test.cpp
 
 $(TEST_BIN): all $(GTEST_LIB) $(TEST_SRCS)
 	@mkdir -p $(BIN_DIR)
