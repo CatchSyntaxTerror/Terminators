@@ -1,14 +1,18 @@
 #include "parser.hpp"
 #include "dot_emitter.hpp"
 #include "symtab.hpp"
-#include "codegen_rv.hpp"
+#include "pseudo_rvgen.hpp"
 #include "labeler.hpp"
 #include "pretty_print.hpp"
+#include "cfg.hpp"
+#include "cfg_dot.hpp"
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <sstream>
 
 using namespace whilec;
+namespace fs = std::filesystem;
 
 int main(int argc, char **argv)
 {
@@ -60,16 +64,25 @@ int main(int argc, char **argv)
         labeledOut.close();
         std::cout << "Labeled program written to labeled_program.while\n";
 
-        // DOT output (with labels if you print them in dot_emitter)
-        DotEmitter de;
-        de.emit(prog.get(), "ast.dot");
-        std::cout << "DOT written to ast.dot\n";
+        // Ensure output directories exist
+        fs::create_directories("dotfiles");
+        fs::create_directories("assemblycode");
 
-        // Output RISC-V assembly (existing functionality)
+        // DOT output (AST)
+        DotEmitter de;
+        de.emit(prog.get(), "dotfiles/ast.dot");
+        std::cout << "AST DOT written to dotfiles/ast.dot\n";
+
+        // CFG output
+        CFG cfg = buildCFG(prog.get());
+        emitCFGDot(cfg, "dotfiles/cfg.dot");
+        std::cout << "CFG DOT written to dotfiles/cfg.dot\n";
+
+        // Assembly output
         auto sym = buildSymbolTable(*prog);
-        std::ofstream asmOut("out_program.s");
-        generate_riscv(*prog, sym, asmOut);
-        std::cout << "ASM written to out_program.s\n";
+        std::ofstream asmOut("assemblycode/out_program.s");
+        generate_pseudo_rv(cfg, sym, asmOut);
+        std::cout << "Assembly written to assemblycode/out_program.s\n";
 
         return 0;
     }

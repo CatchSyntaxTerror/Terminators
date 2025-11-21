@@ -1,0 +1,13 @@
+digraph CFG {
+  node [shape=box];
+  4 [label="ℓ=4\nassign"];
+  3 [label="ℓ=3\nassign"];
+  2 [label="ℓ=2\nassign"];
+  1 [label="ℓ=1\nif"];
+  0 [label="ℓ=0\nassign"];
+  3 -> 4;
+  2 -> 4;
+  1 -> 2 [label="true"];
+  1 -> 3 [label="false"];
+  0 -> 1;
+}
