@@ -1,8 +1,0 @@
--- linear countdown: O(n)
-n := input;
-acc := 0;
-while n > 0 do
-  acc := acc + 1;
-  n := n - 1
-od;
-output := acc

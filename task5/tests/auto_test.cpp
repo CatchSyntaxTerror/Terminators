@@ -15,7 +15,6 @@ namespace fs = std::filesystem;
 static const std::string WHILEC_BIN = "./bin/whilec";
 static const std::string OUT_ASM = "out_program.s";
 
-// run shell capture helper
 static std::pair<int, std::string> run_command_capture(const std::string &cmd)
 {
     std::string out;

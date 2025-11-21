@@ -55,11 +55,11 @@ AllWhileFiles/WhileFileTest.GenerateAsmAndSanityCheck/stress_loop_countdown (25 
 ```
 
 ## stress test on Risc V:
-### To compile and run a single test - stress_nested_loop.while:
+### To compile and run a single test - stress_square.while:
 ```bash
-./bin/unit_tests --gtest_filter=*/stress_nested_loop
+./bin/unit_tests --gtest_filter=*/stress_square
 
-gcc -O2 -o wh build/tests/stress_nested_loop.c build/tests/stress_nested_loop.s
+gcc -O2 -o wh build/tests/stress_square.c build/tests/stress_square.s
 
 ./wh 100000
 ```
@@ -96,6 +96,14 @@ user    0m0.949s
 sys     0m0.009s
 ```
 
+### stress_gcd_mod
+```bash
+time ./wh 102334155 102334156
+real    0m0.688s
+user    0m0.683s
+sys     0m0.005s
+```
+
 ### stress_prime_count
 ```bash
 time ./wh 10000
@@ -103,7 +111,7 @@ real    0m3.321s
 user    0m3.309s
 sys     0m0.000s
 ```
-## stress_factorial_addition:
+### stress_factorial_addition:
 ```bash
 time ./wh 12
 real    0m2.960s
@@ -111,10 +119,42 @@ user    0m2.954s
 sys     0m0.004s
 ```
 
-## stress_factorial_addition:
+### stress_factorial_addition:
 ```bash
 time ./wh 13
 real    0m38.434s
 user    0m38.426s
 sys     0m0.000s
+```
+
+### collatz:
+```bash
+time ./wh 77031
+real    0m1.461s
+user    0m1.456s
+sys     0m0.005s
+```
+
+### madprime:
+```bash
+time ./wh 524287
+real    0m0.035s
+user    0m0.026s
+sys     0m0.008s
+```
+
+### sumfactors:
+```bash
+time ./wh 1200
+real    0m2.894s
+user    0m2.888s
+sys     0m0.004s
+```
+
+## countTriangularNumbers:
+```bash
+time ./wh 0 1000000
+real    0m11.726s
+user    0m11.721s
+sys     0m0.005s
 ```
