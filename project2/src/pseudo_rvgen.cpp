@@ -176,6 +176,13 @@ namespace whilec
         out << "  .globl program\n";
         out << "program:\n";
 
+        out << "  # save s-registers\n";
+        out << "  addi sp, sp, -" << (nvars * 8) << "\n";
+
+        for (int i = 0; i < nvars; ++i) {
+            out << "  sd s" << (i + 1) << ", " << (i * 8) << "(sp)\n";
+        }
+
         out << "  mv   t2, a0\n";
         for (int i = 0; i < nvars; ++i)
         {
@@ -290,6 +297,13 @@ namespace whilec
             out << "  addi t2, t2, 8\n";
         }
 
+        out << "  # restore s-registers\n";
+
+        for (int i = 0; i < nvars; ++i) {
+            out << "  ld s" << (i + 1) << ", " << (i * 8) << "(sp)\n";
+        }
+
+        out << "  addi sp, sp, " << (nvars * 8) << "\n";
         out << "  ret\n";
     }
 

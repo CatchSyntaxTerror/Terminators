@@ -1,0 +1,9 @@
+i := 0;
+s := 0;
+
+while i < n do
+    t := i * 10;
+    s := s + i;
+    t := 0;          -- overwrites previous t
+    i := i + 1
+od

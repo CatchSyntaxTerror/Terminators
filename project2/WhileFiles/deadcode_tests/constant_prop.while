@@ -1,0 +1,12 @@
+x := 10;
+y := x + 20;
+z := y - 5;
+
+if [z > 10] then
+    w := z * 2
+else
+    w := 0      -- dead branch
+fi;
+
+x := w + 0;
+y := x - x     -- dead code

@@ -1,0 +1,8 @@
+x := 0;
+y := 100;
+
+while y < x do
+    x := x + 10      -- dead loop
+od;
+
+z := x + 1

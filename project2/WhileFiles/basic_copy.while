@@ -1,0 +1,4 @@
+-- basic assignment + skip
+x := 2;
+skip;
+y := x

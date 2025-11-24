@@ -1,0 +1,11 @@
+a := 5;
+b := 3;
+
+if a < b then
+    c := a * b     -- dead branch
+else
+    c := a - b
+fi;
+
+d := c * 0;         -- dead code
+e := d + 1

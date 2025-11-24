@@ -1,0 +1,28 @@
+-- Count primes in [2..n] : O(n^3)
+n := input;
+count := 0;
+c := n;
+while c > 1 do
+  isprime := 1;    
+  d := c - 1;         
+  while d > 1 do
+    rem := c;
+    dm1 := d - 1;     
+    while rem > dm1 do
+      rem := rem - d
+    od;
+    if rem = 0 then
+      isprime := 0
+    else
+      skip
+    fi;
+    d := d - 1
+  od;
+  if isprime = 1 then
+    count := count + 1
+  else
+    skip
+  fi;
+  c := c - 1
+od;
+output := count

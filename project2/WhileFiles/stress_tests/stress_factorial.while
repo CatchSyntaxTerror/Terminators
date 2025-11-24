@@ -1,0 +1,16 @@
+-- factorial: simulate multiplication by repeated addition to increase workload
+-- notice that for a input greater than 13, the workload grows extremely fast
+x := input;
+y := x;
+z := 1;  
+while y > 1 do
+  t := 0;
+  i := z;
+  while i > 0 do
+    t := t + y;
+    i := i - 1
+  od;
+  z := t;
+  y := y - 1
+od;
+output := z

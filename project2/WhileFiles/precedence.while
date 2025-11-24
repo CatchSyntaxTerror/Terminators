@@ -1,0 +1,4 @@
+-- * binds tighter than +/-
+a := 1 + 2 * 3;     -- expect 7
+b := (1 + 2) * 3;   -- expect 9
+c := a + b

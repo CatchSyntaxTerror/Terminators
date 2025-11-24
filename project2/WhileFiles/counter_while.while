@@ -1,0 +1,7 @@
+-- count down to zero
+n := 5;
+sum := 0;
+while [n > 0] do
+  sum := sum + n;
+  n := n - 1
+od

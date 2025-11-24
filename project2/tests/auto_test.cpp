@@ -12,9 +12,9 @@
 
 namespace fs = std::filesystem;
 
-static const std::string WHILEC_BIN = "./bin/whilec";
-static const std::string OUT_ASM = "out_program.s";
-static const std::string CSV_SUMMARY = "memops_summary.csv";
+static const std::string WHILEC_BIN = "../src/whilec";
+static const std::string OUT_ASM = "assemblycode/out_program.s";
+static const std::string CSV_SUMMARY = "build/memops_summary.csv";
 
 static std::pair<int, std::string> run_command_capture(const std::string &cmd)
 {
@@ -33,14 +33,15 @@ static std::pair<int, std::string> run_command_capture(const std::string &cmd)
 // asm assertions (use src_text to decide control flow checks)
 static void assert_asm_contains_key_patterns(const std::string &asm_text, const std::string &src_text)
 {
-    std::vector<std::regex> addr_patterns = {
-        std::regex(R"(\bli\s+t2,\s*\d+\b)"),
-        std::regex(R"(\bslli\s+t2,\s*t2,\s*3\b)"),
-        std::regex(R"(\badd\s+t2,\s*(?:a0,\s*t2|t2,\s*a0)\b)")};
-    for (size_t i = 0; i < addr_patterns.size(); ++i)
+    // prologue: mv t2,a0
+    std::vector<std::regex> prologue_patterns = {
+        std::regex(R"(\bmv\s+t2\s*,\s*a0\b)")};
+    for (size_t i = 0; i < prologue_patterns.size(); ++i)
     {
-        ASSERT_TRUE(std::regex_search(asm_text, addr_patterns[i])) << "Missing address calc pattern[" << i << "]";
+        ASSERT_TRUE(std::regex_search(asm_text, prologue_patterns[i]))
+            << "Missing expected prologue pattern[" << i << "]";
     }
+
     std::regex store_or_load(R"((\b(sd|sw|ld|lw)\b)[^\n]*\([^\)\s]+\))");
     ASSERT_TRUE(std::regex_search(asm_text, store_or_load)) << "Missing store/load using base register";
 
@@ -52,116 +53,95 @@ static void assert_asm_contains_key_patterns(const std::string &asm_text, const 
     }
 }
 
-struct AsmInputs
+static int detect_max_sreg(const std::string &asm_text)
 {
-    std::vector<int> all_indices;   // first-seen order of li t2,idx
-    std::vector<int> input_indices; // subset whose first access is ld
-    int vars_size = 0;              // max(idx)+1
-};
+    std::regex sreg(R"(\bs([0-9]+)\b)");
+    std::smatch m;
+    int max_s = -1;
+    int min_s = 1000000;
 
+    auto begin = asm_text.begin();
+    auto end = asm_text.end();
 
-static AsmInputs analyze_inputs_from_asm(const std::string &asm_text)
-{
-    std::istringstream in(asm_text);
-    std::string line;
-
-    std::regex li_t2(R"(^\s*li\s+t2\s*,\s*(\d+)\b)");
-    std::regex ld_0t2(R"(^\s*ld\s+t0\s*,\s*0\s*\(\s*t2\s*\))");
-    std::regex sd_0t2(R"(^\s*sd\s+t0\s*,\s*0\s*\(\s*t2\s*\))");
-
-    int cur_idx = -1;
-    std::unordered_set<int> seen_idx;
-    std::vector<int> order;
-    std::unordered_map<int, char> first_op;
-    int max_idx = -1;
-
-    while (std::getline(in, line))
+    while (std::regex_search(begin, end, m, sreg))
     {
-        for (char &c : line)
-            if (c == '\t')
-                c = ' ';
-        while (!line.empty() && (line.back() == ' ' || line.back() == '\r'))
-            line.pop_back();
-
-        std::smatch m;
-        if (std::regex_search(line, m, li_t2))
-        {
-            cur_idx = std::stoi(m[1].str());
-            if (!seen_idx.count(cur_idx))
-            {
-                seen_idx.insert(cur_idx);
-                order.push_back(cur_idx);
-            }
-            if (cur_idx > max_idx)
-                max_idx = cur_idx;
-            continue;
-        }
-        if (cur_idx != -1)
-        {
-            if (std::regex_search(line, ld_0t2))
-            {
-                if (!first_op.count(cur_idx))
-                    first_op[cur_idx] = 'l';
-            }
-            else if (std::regex_search(line, sd_0t2))
-            {
-                if (!first_op.count(cur_idx))
-                    first_op[cur_idx] = 's';
-            }
-        }
+        int id = std::stoi(m[1]);
+        if (id > max_s) max_s = id;
+        if (id < min_s) min_s = id;
+        begin = m.suffix().first;
     }
 
-    std::vector<int> inputs;
-    for (int idx : order)
-    {
-        auto it = first_op.find(idx);
-        if (it != first_op.end() && it->second == 'l')
-            inputs.push_back(idx);
+    if (max_s < 0) {
+        return 1;
     }
 
-    AsmInputs ai;
-    ai.all_indices = std::move(order);
-    ai.input_indices = std::move(inputs);
-    ai.vars_size = (max_idx >= 0 ? max_idx + 1 : 0);
-    return ai;
+    return max_s - min_s + 1;
 }
 
 // Harness 
-static void write_harness_c_from_asm(int vars_size,
-                                     const std::vector<int> &input_indices,
-                                     const std::string &symbol_name,
-                                     const fs::path &out){
+static void write_harness_c(
+        const std::vector<std::string> &var_names,
+        const std::string &symbol_name,
+        const fs::path &out)
+{
+    int vars_size = var_names.size();
     std::ofstream f(out);
+
     f << "#include <stdlib.h>\n#include <stdio.h>\n\n";
     f << "extern void " << symbol_name << "(long int *vars);\n";
-    if (vars_size <= 0)
-        vars_size = 1;
     f << "long int vars[" << vars_size << "];\n";
+
     f << "int main(int argc, char **argv) {\n";
-    f << "  if (argc != " << (1 + input_indices.size()) << ") {\n";
+    f << "  if (argc != " << (1 + vars_size) << ") {\n";
     f << "    fprintf(stderr, \"Usage: %s";
-    for (size_t i = 0; i < input_indices.size(); ++i)
-        f << " <v" << input_indices[i] << ">";
+    for (auto &v : var_names)
+        f << " <" << v << ">";
     f << "\\n\", argv[0]);\n";
     f << "    return 2;\n";
     f << "  }\n\n";
-    f << "  for (int i = 0; i < " << vars_size << "; ++i) vars[i] = 0;\n";
-    for (size_t j = 0; j < input_indices.size(); ++j)
-    {
-        f << "  vars[" << input_indices[j] << "] = atol(argv[" << (1 + j) << "]);\n";
-    }
+
+    f << "  for (int i = 0; i < " << vars_size << "; i++)\n";
+    f << "      vars[i] = atol(argv[i+1]);\n\n";
+
     f << "  printf(\"Initial state:\\n\");\n";
-    f << "  for (int i = 0; i < " << vars_size << "; ++i) printf(\"v%d=%ld\\n\", i, vars[i]);\n";
+    for (int i = 0; i < vars_size; i++)
+        f << "  printf(\"" << var_names[i]
+           << "=%ld\\n\", vars[" << i << "]);\n";
+
     f << "  " << symbol_name << "(vars);\n";
+
     f << "  printf(\"Final state:\\n\");\n";
-    f << "  for (int i = 0; i < " << vars_size << "; ++i) printf(\"v%d=%ld\\n\", i, vars[i]);\n";
+    for (int i = 0; i < vars_size; i++)
+        f << "  printf(\"" << var_names[i]
+           << "=%ld\\n\", vars[" << i << "]);\n";
+
     f << "  return 0;\n}\n";
-    f.close();
 }
 
-static int count_codegen_rv_memops(const std::string &asm_text) {
-    std::regex ld_pattern(R"(\bld\s+t[0-9]+)");
-    std::regex sd_pattern(R"(\bsd\s+t[0-9]+)");
+static std::vector<std::string> read_var_order_from_labeled(const fs::path &lb)
+{
+    std::vector<std::string> vars;
+    std::ifstream f(lb);
+    std::string tok;
+
+    while (f >> tok)
+    {
+        if (tok == "var")
+        {
+            std::string name;
+            f >> name;
+            if (!name.empty() && name.back() == ';')
+                name.pop_back();
+            vars.push_back(name);
+        }
+    }
+
+    return vars;
+}
+
+static int count_pseudo_rv_memops(const std::string &asm_text) {
+    std::regex ld_pattern(R"(\bld\s+s[0-9]+)");
+    std::regex sd_pattern(R"(\bsd\s+s[0-9]+)");
 
     int count = 0;
 
@@ -187,8 +167,8 @@ static int count_codegen_rv_memops(const std::string &asm_text) {
 static std::vector<fs::path> collect_all_while_files()
 {
     std::vector<fs::path> out;
-    // task5 & taks3
-    for (fs::path root : {fs::path("tests")})
+    
+    for (fs::path root : {fs::path("../WhileFiles")})
     {
         if (!fs::exists(root))
             continue;
@@ -232,8 +212,17 @@ TEST_P(WhileFileTest, GenerateAsmAndSanityCheck)
 {
     std::string file = GetParam();
     SCOPED_TRACE(file);
-   
+
     WhileFileTest::initializeCSV();
+
+    if (fs::exists(OUT_ASM))
+        fs::remove(OUT_ASM);
+    if (fs::exists("dotfiles"))
+        fs::remove_all("dotfiles");
+    if (fs::exists("assemblycode"))
+        fs::remove_all("assemblycode");
+    if (fs::exists("labeled_program.while"))
+        fs::remove("labeled_program.while");
 
     // compile while file -> out_program.s
     std::ostringstream cmd;
@@ -241,7 +230,14 @@ TEST_P(WhileFileTest, GenerateAsmAndSanityCheck)
     auto [rc, out] = run_command_capture(cmd.str());
     ASSERT_EQ(rc, 0) << "whilec failed: " << out;
 
-    ASSERT_TRUE(fs::exists(OUT_ASM)) << "Expected out_program.s after running whilec.";
+    ASSERT_TRUE(fs::exists("labeled_program.while"))
+        << "Expected labeled_program.while to be generated.";
+    ASSERT_TRUE(fs::exists("dotfiles/ast.dot"))
+        << "Expected dotfiles/ast.dot to be generated.";
+    ASSERT_TRUE(fs::exists("dotfiles/cfg.dot"))
+        << "Expected dotfiles/cfg.dot to be generated.";
+    ASSERT_TRUE(fs::exists(OUT_ASM))
+        << "Expected pseudo RISC-V asm at " << OUT_ASM;
 
     // read asm
     std::ifstream asm_in(OUT_ASM);
@@ -259,31 +255,36 @@ TEST_P(WhileFileTest, GenerateAsmAndSanityCheck)
 
     // asm checks
     assert_asm_contains_key_patterns(asm_text, src_text);
-    int memops = count_codegen_rv_memops(asm_text);
+    int memops = count_pseudo_rv_memops(asm_text);
+    int vars_size = detect_max_sreg(asm_text);
 
-    std::cout << "\n\n[==========]" << memops << "\n\n";
+    std::cout << "\n\n[==========] memops=" << memops
+              << ", vars_size=" << vars_size << "\n\n";    
     fs::path p(file);
     std::string stem = p.stem().string();
 
     WhileFileTest::appendCSV(stem, memops);
-    
+
     int tests_to_run = ::testing::UnitTest::GetInstance()->test_to_run_count();
     bool single_test_run = (tests_to_run == 1);
 
     if (single_test_run)
     {
-        fs::path keep_dir = "build/tests";
+        fs::path keep_dir = "build";
         fs::create_directories(keep_dir);
-
-        // fs::path p(file);
-        // std::string stem = p.stem().string();
-
+        
+        auto var_order = read_var_order_from_labeled("../src/labeled_program.while");
+        if (var_order.empty() || (int)var_order.size() != vars_size) {
+            var_order.clear();
+            for (int i = 0; i < vars_size; ++i) {
+                var_order.push_back("v" + std::to_string(i));
+            }
+        }
         // analyze inputs directly from assembly
-        AsmInputs ai = analyze_inputs_from_asm(asm_text);
         const std::string sym = "program"; 
 
         fs::path harness_path = keep_dir / (stem + ".c");
-        write_harness_c_from_asm(ai.vars_size, ai.input_indices, sym, harness_path);
+        write_harness_c(var_order, sym, harness_path);
 
         fs::path asm_copy = keep_dir / (stem + ".s");
         fs::copy_file(OUT_ASM, asm_copy, fs::copy_options::overwrite_existing);

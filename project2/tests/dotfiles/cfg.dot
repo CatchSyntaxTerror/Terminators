@@ -1,0 +1,33 @@
+digraph CFG {
+  node [shape=box];
+  12 [label="ℓ=12\nassign"];
+  11 [label="ℓ=11\nassign"];
+  10 [label="ℓ=10\nassign"];
+  9 [label="ℓ=9\nassign"];
+  8 [label="ℓ=8\nif"];
+  7 [label="ℓ=7\nassign"];
+  6 [label="ℓ=6\nif"];
+  5 [label="ℓ=5\nassign"];
+  4 [label="ℓ=4\nif"];
+  3 [label="ℓ=3\nif"];
+  2 [label="ℓ=2\nassign"];
+  1 [label="ℓ=1\nif"];
+  0 [label="ℓ=0\nassign"];
+  11 -> 12;
+  10 -> 12;
+  9 -> 12;
+  8 -> 9 [label="true"];
+  8 -> 10 [label="false"];
+  7 -> 12;
+  6 -> 7 [label="true"];
+  6 -> 8 [label="false"];
+  5 -> 12;
+  4 -> 5 [label="true"];
+  4 -> 6 [label="false"];
+  3 -> 4 [label="true"];
+  3 -> 11 [label="false"];
+  2 -> 12;
+  1 -> 2 [label="true"];
+  1 -> 3 [label="false"];
+  0 -> 1;
+}
