@@ -1,28 +1,18 @@
 digraph CFG {
   node [shape=box];
-  11 [label="ℓ=11\nassign"];
-  10 [label="ℓ=10\nassign"];
-  9 [label="ℓ=9\nassign"];
-  8 [label="ℓ=8\nassign"];
-  7 [label="ℓ=7\nassign"];
-  6 [label="ℓ=6\nwhile"];
+  6 [label="ℓ=6\nassign"];
   5 [label="ℓ=5\nassign"];
   4 [label="ℓ=4\nassign"];
-  3 [label="ℓ=3\nwhile"];
-  2 [label="ℓ=2\nassign"];
+  3 [label="ℓ=3\nif"];
+  2 [label="ℓ=2\nwhile"];
   1 [label="ℓ=1\nassign"];
   0 [label="ℓ=0\nassign"];
-  10 -> 3;
-  9 -> 10;
-  8 -> 6;
-  7 -> 8;
-  6 -> 7 [label="body"];
-  6 -> 9 [label="exit"];
-  5 -> 6;
-  4 -> 5;
-  3 -> 4 [label="body"];
-  3 -> 11 [label="exit"];
-  2 -> 3;
+  5 -> 2;
+  4 -> 2;
+  3 -> 4 [label="true"];
+  3 -> 5 [label="false"];
+  2 -> 3 [label="body"];
+  2 -> 6 [label="exit"];
   1 -> 2;
   0 -> 1;
 }

@@ -2,12 +2,13 @@
   .globl program
 program:
   # save s-registers
-  addi sp, sp, -40
+  addi sp, sp, -48
   sd s1, 0(sp)
   sd s2, 8(sp)
   sd s3, 16(sp)
   sd s4, 24(sp)
   sd s5, 32(sp)
+  sd s6, 40(sp)
   mv   t2, a0
   # s1 <- input (a)
   ld   s1, 0(t2)
@@ -21,8 +22,11 @@ program:
   # s4 <- input (input2)
   ld   s4, 0(t2)
   addi t2, t2, 8
-  # s5 <- input (output)
+  # s5 <- input (t)
   ld   s5, 0(t2)
+  addi t2, t2, 8
+  # s6 <- input (output)
+  ld   s6, 0(t2)
   addi t2, t2, 8
   j    L0
 
@@ -47,41 +51,50 @@ L2:
   seqz t0, t0
   snez t0, t0
   xori t0, t0, 1
-  beqz t0, L6   # exit
+  beqz t0, L8   # exit
   j    L3           # true → body
 
 L3:
-  # ℓ=3  if
-  mv   t0, s1
-  mv   t1, t0
+  # ℓ=3  while
   mv   t0, s3
+  mv   t1, t0
+  mv   t0, s1
   slt  t0, t1, t0
   xori t0, t0, 1
-  beqz t0, L5   # false → else
-  j    L4       # true → then
+  beqz t0, L5   # exit
+  j    L4           # true → body
 
 L4:
   # ℓ=4  assign
-  mv   t0, s1
-  mv   t1, t0
-  mv   t0, s3
-  sub  t0, t1, t0
-  mv   s1, t0
-  j    L2
-
-L5:
-  # ℓ=5  assign
   mv   t0, s3
   mv   t1, t0
   mv   t0, s1
   sub  t0, t1, t0
   mv   s3, t0
-  j    L2
+  j    L3
+
+L5:
+  # ℓ=5  assign
+  mv   t0, s1
+  mv   s5, t0
+  j    L6
 
 L6:
   # ℓ=6  assign
   mv   t0, s3
-  mv   s5, t0
+  mv   s1, t0
+  j    L7
+
+L7:
+  # ℓ=7  assign
+  mv   t0, s5
+  mv   s3, t0
+  j    L2
+
+L8:
+  # ℓ=8  assign
+  mv   t0, s3
+  mv   s6, t0
   j    L_end
 
 L_end:
@@ -98,8 +111,11 @@ L_end:
   # output (input2) <- s4
   sd   s4, 0(t2)
   addi t2, t2, 8
-  # output (output) <- s5
+  # output (t) <- s5
   sd   s5, 0(t2)
+  addi t2, t2, 8
+  # output (output) <- s6
+  sd   s6, 0(t2)
   addi t2, t2, 8
   # restore s-registers
   ld s1, 0(sp)
@@ -107,5 +123,6 @@ L_end:
   ld s3, 16(sp)
   ld s4, 24(sp)
   ld s5, 32(sp)
-  addi sp, sp, 40
+  ld s6, 40(sp)
+  addi sp, sp, 48
   ret
