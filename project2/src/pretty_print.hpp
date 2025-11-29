@@ -4,8 +4,7 @@
 
 namespace whilec {
 
-/// Pretty-print a labeled AST as a WHILE program with labels inserted as comments.
-/// `indent` controls initial indentation (in two-space units).
 void prettyPrintLabeled(Node* n, std::ostream& out, int indent = 0);
+void prettyPrintSingleLine(const Node* n, std::ostream& out);
 
-} // namespace whilec
+}

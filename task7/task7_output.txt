@@ -1,0 +1,78 @@
+ℓ=0: n := in
+  gen = {in}
+  kill = {n}
+  OUT[0] = IN[1]
+  IN[0] = gen ∪ (OUT[0] \ kill)
+
+ℓ=1: if ((n > 100)) then ...
+  gen = {n}
+  kill = {}
+  OUT[1] = IN[2] ∪ IN[3]
+  IN[1] = gen ∪ (OUT[1] \ kill)
+
+ℓ=2: y := 5
+  gen = {}
+  kill = {y}
+  OUT[2] = IN[12]
+  IN[2] = gen ∪ (OUT[2] \ kill)
+
+ℓ=3: if ((not (n <= 20))) then ...
+  gen = {not, n}
+  kill = {}
+  OUT[3] = IN[4] ∪ IN[11]
+  IN[3] = gen ∪ (OUT[3] \ kill)
+
+ℓ=4: if ((n < 41)) then ...
+  gen = {n}
+  kill = {}
+  OUT[4] = IN[5] ∪ IN[6]
+  IN[4] = gen ∪ (OUT[4] \ kill)
+
+ℓ=5: y := 1
+  gen = {}
+  kill = {y}
+  OUT[5] = IN[12]
+  IN[5] = gen ∪ (OUT[5] \ kill)
+
+ℓ=6: if (((n > 80) and (n <= 100))) then ...
+  gen = {n, and}
+  kill = {}
+  OUT[6] = IN[7] ∪ IN[8]
+  IN[6] = gen ∪ (OUT[6] \ kill)
+
+ℓ=7: y := 4
+  gen = {}
+  kill = {y}
+  OUT[7] = IN[12]
+  IN[7] = gen ∪ (OUT[7] \ kill)
+
+ℓ=8: if (((n < 51) or (n <= 60))) then ...
+  gen = {n, or}
+  kill = {}
+  OUT[8] = IN[9] ∪ IN[10]
+  IN[8] = gen ∪ (OUT[8] \ kill)
+
+ℓ=9: y := 2
+  gen = {}
+  kill = {y}
+  OUT[9] = IN[12]
+  IN[9] = gen ∪ (OUT[9] \ kill)
+
+ℓ=10: y := 3
+  gen = {}
+  kill = {y}
+  OUT[10] = IN[12]
+  IN[10] = gen ∪ (OUT[10] \ kill)
+
+ℓ=11: y := 0
+  gen = {}
+  kill = {y}
+  OUT[11] = IN[12]
+  IN[11] = gen ∪ (OUT[11] \ kill)
+
+ℓ=12: out := y
+  gen = {y}
+  kill = {out}
+  OUT[12] = EXIT_LIVE
+  IN[12] = gen ∪ (OUT[12] \ kill)
+

@@ -75,3 +75,23 @@ void whilec::prettyPrintLabeled(Node* n, std::ostream& out, int indent) {
     }
     // Expression nodes are not printed standalone.
 }
+void whilec::prettyPrintSingleLine(const Node* n, std::ostream& out)
+{
+    if (!n) return;
+
+    if (auto p = dynamic_cast<const Assign*>(n)) {
+        out << p->name << " := " << exprToString(p->expr.get());
+    }
+    else if (auto p = dynamic_cast<const Skip*>(n)) {
+        out << "skip";
+    }
+    else if (auto p = dynamic_cast<const If*>(n)) {
+        out << "if (" << exprToString(p->cond.get()) << ") then ...";
+    }
+    else if (auto p = dynamic_cast<const While*>(n)) {
+        out << "while (" << exprToString(p->cond.get()) << ") do ...";
+    }
+    else {
+        out << "unknown";
+    }
+}
