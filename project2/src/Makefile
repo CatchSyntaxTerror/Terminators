@@ -12,7 +12,10 @@ SRC = \
     symtab.cpp \
     cfg.cpp \
     cfg_dot.cpp \
-    main.cpp
+    dead_code_elimination.cpp \
+    main.cpp \
+    register_allocation.cpp
+
 
 OBJ = $(SRC:.cpp=.o)
 BIN = whilec

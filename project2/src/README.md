@@ -24,3 +24,9 @@ make clean
 rm -rf dotfiles assemblycode
 ```
 
+## Run dead code elimination
+```
+make
+./whilec dead_test_hard.while
+```
+

@@ -1,0 +1,30 @@
+x := 0;
+y := 0;
+z := 0;
+w := 0;
+u := 1;
+v := 2;
+
+dead1 := 5;
+dead2 := x + y;
+
+while u < 10 do
+  t := u + v;
+  if t < 8 then
+    a := t + 1;
+    y := y + a
+  else
+    b := t * 2;
+    z := z + 1
+  fi;
+  junk := u + z;
+  u := u + 1
+od;
+
+c := y + z;
+d := c;
+d := d + 1;
+e := d;
+e := e + 1;
+tmp := x + dead1;
+output := d

@@ -4,29 +4,73 @@
 
 namespace whilec
 {
-
     namespace
     {
+        // Forward decls
+        static void evalAExp(const Node *e,
+                             const SymbolTable &sym,
+                             const RegAllocMap &alloc,
+                             std::ostream &out);
+        static void evalBExp(const Node *e,
+                             const SymbolTable &sym,
+                             const RegAllocMap &alloc,
+                             std::ostream &out);
 
-        // Maps variables to s registers
-        static std::string regForVar(const std::string &name, const SymbolTable &sym)
-        {
-            int idx = sym.indexOf(name);
-            return "s" + std::to_string(idx + 1);
-        }
-
-        static void evalAExp(const Node *e, const SymbolTable &sym, std::ostream &out);
-        static void evalBExp(const Node *e, const SymbolTable &sym, std::ostream &out);
-
-        // normalizes t0
         static void normalize01(std::ostream &out)
         {
             out << "  snez t0, t0\n";
         }
 
-        static void evalAExp(const Node *e, const SymbolTable &sym, std::ostream &out)
+        // Load variable into t0, respecting spills.
+        static void loadVar(const std::string &name,
+                            const SymbolTable &sym,
+                            const RegAllocMap &alloc,
+                            std::ostream &out)
         {
+            int idx = sym.indexOf(name);
+            int r = alloc[idx];
 
+            if (r > 0)
+            {
+                out << "  mv   t0, s" << r << "\n";
+            }
+            else
+            {
+                out << "  li   t2, " << idx << "\n";
+                out << "  slli t2, t2, 3\n";
+                out << "  add  t2, a0, t2\n";
+                out << "  ld   t0, 0(t2)\n";
+            }
+        }
+
+        // Store t0 into variable, respecting spills.
+        static void storeVar(const std::string &name,
+                             const SymbolTable &sym,
+                             const RegAllocMap &alloc,
+                             std::ostream &out)
+        {
+            int idx = sym.indexOf(name);
+            int r = alloc[idx];
+
+            if (r > 0)
+            {
+                out << "  mv   s" << r << ", t0\n";
+            }
+            else
+            {
+                out << "  li   t2, " << idx << "\n";
+                out << "  slli t2, t2, 3\n";
+                out << "  add  t2, a0, t2\n";
+                out << "  sd   t0, 0(t2)\n";
+            }
+        }
+
+        // ===== arithmetic expressions =====
+        static void evalAExp(const Node *e,
+                             const SymbolTable &sym,
+                             const RegAllocMap &alloc,
+                             std::ostream &out)
+        {
             if (auto k = dynamic_cast<const Int *>(e))
             {
                 out << "  li   t0, " << k->val << "\n";
@@ -35,15 +79,15 @@ namespace whilec
 
             if (auto v = dynamic_cast<const Var *>(e))
             {
-                out << "  mv   t0, " << regForVar(v->name, sym) << "\n";
+                loadVar(v->name, sym, alloc, out);
                 return;
             }
 
             if (auto b = dynamic_cast<const ABin *>(e))
             {
-                evalAExp(b->left.get(), sym, out);
+                evalAExp(b->left.get(), sym, alloc, out);
                 out << "  mv   t1, t0\n";
-                evalAExp(b->right.get(), sym, out);
+                evalAExp(b->right.get(), sym, alloc, out);
 
                 if (b->op == "+")
                 {
@@ -64,12 +108,15 @@ namespace whilec
                 throw std::runtime_error("Unsupported arithmetic op: " + b->op);
             }
 
-            throw std::runtime_error("Unknown arithmetic expression type");
+            throw std::runtime_error("Unsupported arithmetic expression node");
         }
 
-        static void evalBExp(const Node *e, const SymbolTable &sym, std::ostream &out)
+        // ===== boolean expressions =====
+        static void evalBExp(const Node *e,
+                             const SymbolTable &sym,
+                             const RegAllocMap &alloc,
+                             std::ostream &out)
         {
-
             if (auto b = dynamic_cast<const Bool *>(e))
             {
                 out << "  li   t0, " << (b->val ? 1 : 0) << "\n";
@@ -78,7 +125,7 @@ namespace whilec
 
             if (auto u = dynamic_cast<const Not *>(e))
             {
-                evalBExp(u->bexp.get(), sym, out);
+                evalBExp(u->bexp.get(), sym, alloc, out);
                 normalize01(out);
                 out << "  xori t0, t0, 1\n";
                 return;
@@ -86,9 +133,9 @@ namespace whilec
 
             if (auto bb = dynamic_cast<const BBin *>(e))
             {
-                evalBExp(bb->left.get(), sym, out);
+                evalBExp(bb->left.get(), sym, alloc, out);
                 out << "  mv   t1, t0\n";
-                evalBExp(bb->right.get(), sym, out);
+                evalBExp(bb->right.get(), sym, alloc, out);
                 out << "  snez t1, t1\n";
                 out << "  snez t0, t0\n";
 
@@ -108,9 +155,9 @@ namespace whilec
 
             if (auto r = dynamic_cast<const Rel *>(e))
             {
-                evalAExp(r->left.get(), sym, out);
+                evalAExp(r->left.get(), sym, alloc, out);
                 out << "  mv   t1, t0\n";
-                evalAExp(r->right.get(), sym, out);
+                evalAExp(r->right.get(), sym, alloc, out);
 
                 if (r->op == "=")
                 {
@@ -144,7 +191,8 @@ namespace whilec
                 throw std::runtime_error("Unsupported relation op: " + r->op);
             }
 
-            evalAExp(e, sym, out);
+            // Fallback: interpret e as arithmetic and normalize to 0/1.
+            evalAExp(e, sym, alloc, out);
             normalize01(out);
         }
 
@@ -161,34 +209,60 @@ namespace whilec
             return "cmd";
         }
 
-    }
+    } // namespace
 
-    // Generates risc-v pseudo code
-    void generate_pseudo_rv(const CFG &cfg, const SymbolTable &sym, std::ostream &out)
+    void generate_pseudo_rv(const CFG &cfg,
+                            const SymbolTable &sym,
+                            const std::unordered_set<int> &deadLabels,
+                            const RegAllocMap &alloc,
+                            std::ostream &out)
     {
-
         const auto &names = sym.names();
-        const int nvars = names.size();
+        const int nvars = static_cast<int>(names.size());
         const std::string END_LABEL = "L_end";
+
+        // Which s-registers are actually used?
+        std::vector<bool> usedS(12, false); // indexes 1..11
+        for (int i = 0; i < nvars; ++i)
+        {
+            int r = alloc[i];
+            if (r > 0 && r <= 11)
+                usedS[r] = true;
+        }
+
+        std::vector<int> usedRegs;
+        for (int r = 1; r <= 11; ++r)
+            if (usedS[r])
+                usedRegs.push_back(r);
+
+        int numUsed = static_cast<int>(usedRegs.size());
 
         // Prologue
         out << "  .text\n";
         out << "  .globl program\n";
         out << "program:\n";
 
-        out << "  # save s-registers\n";
-        out << "  addi sp, sp, -" << (nvars * 8) << "\n";
-
-        for (int i = 0; i < nvars; ++i) {
-            out << "  sd s" << (i + 1) << ", " << (i * 8) << "(sp)\n";
+        if (numUsed > 0)
+        {
+            out << "  # save used s-registers\n";
+            out << "  addi sp, sp, -" << (numUsed * 8) << "\n";
+            for (int i = 0; i < numUsed; ++i)
+            {
+                int r = usedRegs[i];
+                out << "  sd   s" << r << ", " << (i * 8) << "(sp)\n";
+            }
         }
 
+        // Load initial values for register-allocated variables from a0 array.
         out << "  mv   t2, a0\n";
         for (int i = 0; i < nvars; ++i)
         {
-            out << "  # s" << (i + 1) << " <- input (" << names[i] << ")\n";
-            out << "  ld   s" << (i + 1) << ", 0(t2)\n";
-
+            int r = alloc[i];
+            if (r > 0)
+            {
+                out << "  # s" << r << " <- input (" << names[i] << ")\n";
+                out << "  ld   s" << r << ", 0(t2)\n";
+            }
             out << "  addi t2, t2, 8\n";
         }
 
@@ -199,6 +273,7 @@ namespace whilec
 
         // Sorted block traversal
         std::vector<const CFGNode *> nodes;
+        nodes.reserve(cfg.nodes.size());
         for (const auto &kv : cfg.nodes)
             nodes.push_back(kv.second.get());
 
@@ -209,27 +284,28 @@ namespace whilec
         // Emit each block
         for (const CFGNode *node : nodes)
         {
-
             const Node *ast = node->ast;
             if (!ast)
                 continue;
 
             out << "L" << node->label << ":\n";
-            out << "  # ℓ=" << node->label << "  " << nodeKind(ast) << "\n";
+            const std::string kind = nodeKind(ast);
 
             // Assign
             if (auto a = dynamic_cast<const Assign *>(ast))
             {
-                evalAExp(a->expr.get(), sym, out);
-                out << "  mv   " << regForVar(a->name, sym) << ", t0\n";
+                // Skip the actual assignment if this label is dead
+                if (!deadLabels.count(node->label))
+                {
+                    evalAExp(a->expr.get(), sym, alloc, out);
+                    storeVar(a->name, sym, alloc, out);
+                }
             }
-
             // Skip
             else if (dynamic_cast<const Skip *>(ast))
             {
-                // nothing
+                // no-op
             }
-
             // If
             else if (auto i = dynamic_cast<const If *>(ast))
             {
@@ -239,36 +315,32 @@ namespace whilec
                 const CFGNode *thenNode = node->succ[0];
                 const CFGNode *elseNode = node->succ[1];
 
-                evalBExp(i->cond.get(), sym, out);
-
-                out << "  beqz t0, L" << elseNode->label << "   # false → else\n";
-                out << "  j    L" << thenNode->label << "       # true → then\n";
+                evalBExp(i->cond.get(), sym, alloc, out);
+                out << "  beqz t0, L" << elseNode->label << "   # false -> else\n";
+                out << "  j    L" << thenNode->label << "       # true -> then\n";
             }
-
             // While
             else if (auto w = dynamic_cast<const While *>(ast))
             {
-
                 if (node->succ.empty())
                     throw std::runtime_error("While header missing successors");
 
                 const CFGNode *body = node->succ[0];
                 const CFGNode *after = (node->succ.size() >= 2 ? node->succ[1] : nullptr);
 
-                evalBExp(w->cond.get(), sym, out);
+                evalBExp(w->cond.get(), sym, alloc, out);
 
                 if (after)
                     out << "  beqz t0, L" << after->label << "   # exit\n";
                 else
                     out << "  beqz t0, " << END_LABEL << "       # exit\n";
 
-                out << "  j    L" << body->label << "           # true → body\n";
+                out << "  j    L" << body->label << "           # true -> body\n";
             }
 
-            // assign/skip
+            // Control-flow after simple commands (assign/skip)
             if (dynamic_cast<const Assign *>(ast) || dynamic_cast<const Skip *>(ast))
             {
-
                 if (node->succ.empty())
                 {
                     out << "  j    " << END_LABEL << "\n";
@@ -279,31 +351,40 @@ namespace whilec
                 }
                 else
                 {
-                    throw std::runtime_error("Assign/Skip should have ≤1 successor");
+                    throw std::runtime_error("Assign/Skip should have <=1 successor");
                 }
             }
 
             out << "\n";
         }
 
+        // Epilogue at END_LABEL: write outputs back to a0 array
         out << END_LABEL << ":\n";
         out << "  mv   t2, a0\n";
 
         for (int i = 0; i < nvars; ++i)
         {
-            out << "  # output (" << names[i] << ") <- s" << (i + 1) << "\n";
-            out << "  sd   s" << (i + 1) << ", 0(t2)\n";
-
+            int r = alloc[i];
+            if (r > 0)
+            {
+                out << "  # output (" << names[i] << ") <- s" << r << "\n";
+                out << "  sd   s" << r << ", 0(t2)\n";
+            }
+            // spilled vars already kept in memory by storeVar
             out << "  addi t2, t2, 8\n";
         }
 
-        out << "  # restore s-registers\n";
-
-        for (int i = 0; i < nvars; ++i) {
-            out << "  ld s" << (i + 1) << ", " << (i * 8) << "(sp)\n";
+        if (numUsed > 0)
+        {
+            out << "  # restore used s-registers\n";
+            for (int i = 0; i < numUsed; ++i)
+            {
+                int r = usedRegs[i];
+                out << "  ld   s" << r << ", " << (i * 8) << "(sp)\n";
+            }
+            out << "  addi sp, sp, " << (numUsed * 8) << "\n";
         }
 
-        out << "  addi sp, sp, " << (nvars * 8) << "\n";
         out << "  ret\n";
     }
 

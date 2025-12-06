@@ -6,7 +6,10 @@
 #include "pretty_print.hpp"
 #include "cfg.hpp"
 #include "cfg_dot.hpp"
+#include "dead_code_elimination.hpp"
+#include "register_allocation.hpp"
 #include <filesystem>
+#include <unordered_set>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -80,9 +83,17 @@ int main(int argc, char **argv)
 
         // Assembly output
         auto sym = buildSymbolTable(*prog);
+        // Mark "output" as live at exit
+        std::unordered_set<std::string> exitLive = {"output"};
+        LivenessInfo liv = computeLiveness(cfg, exitLive);
+
+        auto deadLabels = findDeadAssignments(cfg, liv);
+        std::cout << "Dead assignments detected: " << deadLabels.size() << "\n";
+
+        RegAllocMap regAlloc = allocateRegisters(cfg, sym, liv);
+
         std::ofstream asmOut("assemblycode/out_program.s");
-        generate_pseudo_rv(cfg, sym, asmOut);
-        std::cout << "Assembly written to assemblycode/out_program.s\n";
+        generate_pseudo_rv(cfg, sym, deadLabels, regAlloc, asmOut);
 
         return 0;
     }
