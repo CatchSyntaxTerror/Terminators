@@ -178,26 +178,43 @@ void save_task8_solution(const string &outfile) {
         exit(1);
     }
 
-    out << "=== Task 8: Liveness Analysis Result ===\n\n";
+    out << "=== Task 8: Liveness Analysis Result (LV° / LV•) ===\n\n";
 
-    for (auto &p : nodes) {
-        int id = p.first;
+    // 为了输出有序，按 label 排序
+    vector<int> labels;
+    labels.reserve(nodes.size());
+    for (auto &p : nodes) labels.push_back(p.first);
+    sort(labels.begin(), labels.end());
 
-        out << "ℓ=" << id << " : " << nodes[id].stmt << "\n";
+    for (int id : labels) {
+        Node &n = nodes[id];
 
-        out << "  IN = {";
-        bool f = true;
-        for (auto &v : IN[id]) { if (!f) out << ", "; out << v; f = false; }
+        out << "ℓ=" << id << " : " << n.stmt << "\n";
+
+        // LV° 对应 IN 集
+        out << "  LV° = {";
+        bool first = true;
+        for (auto &v : IN[id]) {
+            if (!first) out << ", ";
+            out << v;
+            first = false;
+        }
         out << "}\n";
 
-        out << "  OUT = {";
-        f = true;
-        for (auto &v : OUT[id]) { if (!f) out << ", "; out << v; f = false; }
+        // LV• 对应 OUT 集
+        out << "  LV• = {";
+        first = true;
+        for (auto &v : OUT[id]) {
+            if (!first) out << ", ";
+            out << v;
+            first = false;
+        }
         out << "}\n\n";
     }
 
     out.close();
 }
+
 
 
 /* ------------------------------------------

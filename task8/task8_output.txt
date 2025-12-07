@@ -1,54 +1,54 @@
-=== Task 8: Liveness Analysis Result ===
+=== Task 8: Liveness Analysis Result (LV° / LV•) ===
 
 ℓ=0 : n := in
-  IN = {in}
-  OUT = {n}
+  LV° = {in}
+  LV• = {n}
 
 ℓ=1 : if ((n > 100)) then ...
-  IN = {n}
-  OUT = {n}
+  LV° = {n}
+  LV• = {n}
 
 ℓ=2 : y := 5
-  IN = {}
-  OUT = {y}
+  LV° = {}
+  LV• = {y}
 
 ℓ=3 : if ((not (n <= 20))) then ...
-  IN = {n}
-  OUT = {n}
+  LV° = {n}
+  LV• = {n}
 
 ℓ=4 : if ((n < 41)) then ...
-  IN = {n}
-  OUT = {n}
+  LV° = {n}
+  LV• = {n}
 
 ℓ=5 : y := 1
-  IN = {}
-  OUT = {y}
+  LV° = {}
+  LV• = {y}
 
 ℓ=6 : if (((n > 80) and (n <= 100))) then ...
-  IN = {n}
-  OUT = {n}
+  LV° = {n}
+  LV• = {n}
 
 ℓ=7 : y := 4
-  IN = {}
-  OUT = {y}
+  LV° = {}
+  LV• = {y}
 
 ℓ=8 : if (((n < 51) or (n <= 60))) then ...
-  IN = {n}
-  OUT = {}
+  LV° = {n}
+  LV• = {}
 
 ℓ=9 : y := 2
-  IN = {}
-  OUT = {y}
+  LV° = {}
+  LV• = {y}
 
 ℓ=10 : y := 3
-  IN = {}
-  OUT = {y}
+  LV° = {}
+  LV• = {y}
 
 ℓ=11 : y := 0
-  IN = {}
-  OUT = {y}
+  LV° = {}
+  LV• = {y}
 
 ℓ=12 : out := y
-  IN = {y}
-  OUT = {}
+  LV° = {y}
+  LV• = {}
 
