@@ -1,8 +1,17 @@
-x := 0;
-y := 100;
+n := input;
+i := 0;
+x := 1;
+y := 2;
+sum := 0;
 
-while y < x do
-    x := x + 10      -- dead loop
+while [i < n] do
+  junk1 := x * x + y * y + i * i;
+  junk2 := x + y + n + i;
+  junk3 := x * y + 1234;
+  junk4 := x * x * x + y * y * y;
+
+  sum := sum + x + y;
+  i := i + 1
 od;
 
-z := x + 1
+output := sum

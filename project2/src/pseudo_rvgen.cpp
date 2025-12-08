@@ -215,6 +215,7 @@ namespace whilec
                             const SymbolTable &sym,
                             const std::unordered_set<int> &deadLabels,
                             const RegAllocMap &alloc,
+                            const LivenessInfo &liv,
                             std::ostream &out)
     {
         const auto &names = sym.names();
@@ -253,12 +254,18 @@ namespace whilec
             }
         }
 
-        // Load initial values for register-allocated variables from a0 array.
+        // Load initial values for variables that are live at entry and have a register.
         out << "  mv   t2, a0\n";
+        if (!cfg.entry)
+            throw std::runtime_error("generate_pseudo_rv: CFG has no entry");
+        int entryLabel = cfg.entry->label;
+        const auto &liveInEntry = liv.in.at(entryLabel);
         for (int i = 0; i < nvars; ++i)
         {
             int r = alloc[i];
-            if (r > 0)
+            const std::string &name = names[i];
+
+            if (r > 0 && liveInEntry.count(name))
             {
                 out << "  # s" << r << " <- input (" << names[i] << ")\n";
                 out << "  ld   s" << r << ", 0(t2)\n";

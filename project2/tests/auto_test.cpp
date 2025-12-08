@@ -81,27 +81,37 @@ static int detect_max_sreg(const std::string &asm_text)
 // Harness 
 static void write_harness_c(
         const std::vector<std::string> &var_names,
+        const std::vector<std::string> &livein_names,
         const std::string &symbol_name,
         const fs::path &out)
 {
     int vars_size = var_names.size();
-    std::ofstream f(out);
+    int live_count = livein_names.size();
+    std::unordered_set<std::string> livein_set(livein_names.begin(),
+                                               livein_names.end());
 
+    std::ofstream f(out);
     f << "#include <stdlib.h>\n#include <stdio.h>\n\n";
     f << "extern void " << symbol_name << "(long int *vars);\n";
     f << "long int vars[" << vars_size << "];\n";
 
     f << "int main(int argc, char **argv) {\n";
-    f << "  if (argc != " << (1 + vars_size) << ") {\n";
+    f << "  if (argc != " << (1 + live_count) << ") {\n";
     f << "    fprintf(stderr, \"Usage: %s";
-    for (auto &v : var_names)
+    for (auto &v : livein_names)
         f << " <" << v << ">";
     f << "\\n\", argv[0]);\n";
-    f << "    return 2;\n";
-    f << "  }\n\n";
+    f << "    return 2;\n  }\n\n";
 
-    f << "  for (int i = 0; i < " << vars_size << "; i++)\n";
-    f << "      vars[i] = atol(argv[i+1]);\n\n";
+    f << "  for (int i=0;i<" << vars_size << ";i++) vars[i]=0;\n";
+    f << "  int ai = 1;\n";
+
+    for (int i = 0; i < vars_size; i++)
+    {
+        if (livein_set.count(var_names[i]))
+            f << "  vars[" << i << "] = atol(argv[ai++]); // "<<var_names[i]<<"\n";
+    }
+    f << "\n";
 
     f << "  printf(\"Initial state:\\n\");\n";
     for (int i = 0; i < vars_size; i++)
@@ -120,23 +130,35 @@ static void write_harness_c(
 
 static std::vector<std::string> read_var_order_from_labeled(const fs::path &lb)
 {
-    std::vector<std::string> vars;
     std::ifstream f(lb);
-    std::string tok;
+    std::string text((std::istreambuf_iterator<char>(f)),
+                     std::istreambuf_iterator<char>());
 
-    while (f >> tok)
+    std::regex id(R"([A-Za-z_][A-Za-z0-9_]*)");
+    std::unordered_set<std::string> keywords =
+        {"if","then","else","while","do","od","skip",
+         "and","or","not","true","false","fi"};
+
+    std::set<std::string> vars;
+
+    auto it = std::sregex_iterator(text.begin(), text.end(), id);
+    auto end = std::sregex_iterator();
+    for (; it != end; ++it)
     {
-        if (tok == "var")
-        {
-            std::string name;
-            f >> name;
-            if (!name.empty() && name.back() == ';')
-                name.pop_back();
-            vars.push_back(name);
-        }
+        std::string v = it->str();
+        if (!keywords.count(v))
+            vars.insert(v);
     }
+    return std::vector<std::string>(vars.begin(), vars.end());
+}
 
-    return vars;
+static std::vector<std::string> read_livein()
+{
+    std::ifstream in("liveness_entry.txt");
+    std::vector<std::string> xs;
+    std::string v;
+    while (in >> v) xs.push_back(v);
+    return xs;
 }
 
 static int count_pseudo_rv_memops(const std::string &asm_text) {
@@ -273,21 +295,22 @@ TEST_P(WhileFileTest, GenerateAsmAndSanityCheck)
         fs::path keep_dir = "build";
         fs::create_directories(keep_dir);
         
-        auto var_order = read_var_order_from_labeled("../src/labeled_program.while");
-        if (var_order.empty() || (int)var_order.size() != vars_size) {
-            var_order.clear();
-            for (int i = 0; i < vars_size; ++i) {
-                var_order.push_back("v" + std::to_string(i));
-            }
+        auto var_order = read_var_order_from_labeled("labeled_program.while");
+        auto livein_vars = read_livein();
+
+        if (var_order.empty())
+        {
+            // fallback
+            for (int i=0; i<vars_size; ++i)
+                var_order.push_back("v"+std::to_string(i));
         }
-        // analyze inputs directly from assembly
-        const std::string sym = "program"; 
 
-        fs::path harness_path = keep_dir / (stem + ".c");
-        write_harness_c(var_order, sym, harness_path);
+        fs::path harness_path = keep_dir / (fs::path(file).stem().string() + ".c");
+        write_harness_c(var_order, livein_vars, "program", harness_path);
 
-        fs::path asm_copy = keep_dir / (stem + ".s");
-        fs::copy_file(OUT_ASM, asm_copy, fs::copy_options::overwrite_existing);
+        fs::path asm_copy = keep_dir / (fs::path(file).stem().string() + ".s");
+        fs::copy_file(OUT_ASM, asm_copy,
+                      fs::copy_options::overwrite_existing);
     }
     else
     {

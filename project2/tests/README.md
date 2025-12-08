@@ -1,14 +1,20 @@
-# Task5 & 6 — Testing and performance evaluation
+# Task5 & 6 & 10 & 11 — Testing, Liveness-Aware Input Inference, and Performance Evaluation
   Authors: Zhuo Li
   
-  This task introduces **automated tests** for the WHILE compiler using **Google Test (GTest)**.
-  
-  Zhuo added the gtest program
-  ```
-    auto_test.cpp
-  ```
+  This `README` file describes the **automated testing system** used for validating our WHILE compiler including:
+  - **Task 5**: Automated testing infastructure
+  - **Task 6**: Performance comparison with Project 1
+  - **Task 10**: Inference the input-variable based on the liveness analysis result
+  - **Task 11**: Final performace evaluation
 
-  The test harness:
+All commands below are running under the `project2/src` folder.
+<html ><hr> </html>
+
+We implemented the GoogleTest test suite:
+```
+  auto_test.cpp
+```
+The test framework performs the following:
   - Automatically discovers all `.while` programs from:
     - `WhileFiles/`
   - Compiles each file with the compiler `./whilec`
@@ -17,13 +23,16 @@
     - `labeled_program.while`
     - `dotfiles/ast.dot`
     - `dotfiles/cfg.dot`
+    
   - Validates the pseudo RISC-V assembly, which ensures:
     - Correct prologue: `mv t2, a0`
-    - Load/store for variable initialization: `ld sX, offset(t2)`, `sd sX, offset(t2)`
+    - Load/store for variable initialization: `ld` or `sd sX`
+    - Control-flow instructions when the source contains `if`/`while`
+  - Records number of memory operations into: `build/memops_summary.csv`
 
   This allows quick verification of correctness and stability after every code change.
-
----
+  
+  Comparing to phase 2, after the dead code analysis and liveness analysis, we now know exactly which variables are live at program entry. By outputing these variables into the file `liveness_entry.txt`, the test harness can then read the file and accept only the live-in variables rather than all variables.
 
 ## Requirements
 - C++17 compatible compiler (g++, clang++)
@@ -55,16 +64,11 @@ AllWhileFiles/WhileFileTest.GenerateAsmAndSanityCheck/stress_loop_countdown (25 
 
 ### To list all test names:
 ```bash
-./test_runner --gtest_list_tests
+../tests/test_runner --gtest_list_tests
 ```
-
-## Performace Evaluation
-Task 6 compares the performace between register-based RISC-V (Project 2) with memory-based RISC-V (Project 1)
-
-### Stress Test on Risc V:
-#### To compile and run a single test - stress_square.while:
+### To compile and run a single test - stress_square.while:
 ```bash
-./bin/unit_tests --gtest_filter=*/stress_square
+../tests/test_runner --gtest_filter=*/stress_square
 
 gcc -O2 -o wh build/tests/stress_square.c build/tests/stress_square.s
 
@@ -87,9 +91,11 @@ v3=10000000000
 v4=0
 v5=10000000000
 ```
-### To time on Risc V:
+
+## Performace Evaluation - Task 6
+### stress_square:
 ```bash
-time ./wh 100000
+time ./wh 0 100000 0 0 0 0 
 real    0m42.945s
 user    0m42.941s
 sys     0m0.000s
@@ -132,4 +138,59 @@ time ./wh 0 13 0 0 0 0 0
 real    0m19.218s
 user    0m19.210s
 sys     0m0.004s
+```
+
+## Performace Evaluation - Task 11
+### stress_square:
+```bash
+time ./wh 100000
+real    0m42.983s
+user    0m42.929s
+sys     0m0.005s
+```
+
+### stress_gcd_sub
+```bash
+time ./wh 1 100000000
+real    0m0.505s
+user    0m0.504s
+sys     0m0.001s
+```
+
+### stress_gcd_mod
+```bash
+time ./wh 102334155 102334156
+real    0m0.371s
+user    0m0.369s
+sys     0m0.001s
+```
+
+### stress_prime_count
+```bash
+time ./wh 10000
+real    3m9.131s
+user    3m9.072s
+sys     0m0.029s
+```
+### stress_factorial:
+```bash
+time ./wh 12
+real    0m1.589s
+user    0m1.480s
+sys     0m0.001s
+```
+
+### stress_factorial:
+```bash
+time ./wh 13
+real    0m19.217s
+user    0m19.205s
+sys     0m0.009s
+```
+### closest_prime:
+```bash
+time ./wh 387096383
+real    0m0.004s
+user    0m0.000s
+sys     0m0.003s
 ```

@@ -83,9 +83,10 @@ int main(int argc, char **argv)
 
         // Assembly output
         auto sym = buildSymbolTable(*prog);
-        // Mark "output" as live at exit
-        std::unordered_set<std::string> exitLive = {"output"};
-        LivenessInfo liv = computeLiveness(cfg, exitLive);
+        //  (auto &v : liv.in.at(entry)) {
+            f << v << " ";
+        }
+        std::cout << "Wrote liveness_entry.txt\n";
 
         auto deadLabels = findDeadAssignments(cfg, liv);
         std::cout << "Dead assignments detected: " << deadLabels.size() << "\n";
@@ -93,7 +94,7 @@ int main(int argc, char **argv)
         RegAllocMap regAlloc = allocateRegisters(cfg, sym, liv);
 
         std::ofstream asmOut("assemblycode/out_program.s");
-        generate_pseudo_rv(cfg, sym, deadLabels, regAlloc, asmOut);
+        generate_pseudo_rv(cfg, sym, deadLabels, regAlloc, liv, asmOut);
 
         return 0;
     }

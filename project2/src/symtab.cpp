@@ -95,6 +95,7 @@ namespace whilec
 
         SymbolTable sym;
         sym.names_ = std::move(ordered);
+        std::sort(sym.names_.begin(), sym.names_.end());
         for (int i = 0; i < (int)sym.names_.size(); ++i)
         {
             sym.toIndex_[sym.names_[i]] = i;

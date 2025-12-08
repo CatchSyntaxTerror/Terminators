@@ -1,19 +1,17 @@
-x := 10;
-y := x - 10;
-z := y * 5;
-
-if z > 1 then
-    w := 999
-else
-    w := 1
-fi;
+n := input;
 
 i := 0;
+sum := 0;
 
 while i < n do
-    t := i * 100;
-    t := i + 1;
+    j := 0;
+    while j < n do
+        sum := sum + (i * j);
+        j := j + 1
+    od;
     i := i + 1
 od;
 
-u := w
+x := 1;
+y := 2 * x;
+output := y

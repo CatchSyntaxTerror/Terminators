@@ -186,7 +186,11 @@ namespace whilec
             if (auto a = dynamic_cast<const Assign *>(ast))
             {
                 const auto &outSet = liv.out.at(label);
-
+                
+                // output := make must never be removed
+                if (a->name == "output") {
+                    continue;
+                }
                 // Dead assignment rule:
                 // If x ∉ OUT[label], then x := a is dead
                 if (!outSet.count(a->name))

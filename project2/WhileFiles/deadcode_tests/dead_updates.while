@@ -1,3 +1,4 @@
+n := input;
 i := 0;
 s := 0;
 
@@ -6,4 +7,5 @@ while i < n do
     s := s + i;
     t := 0;          -- overwrites previous t
     i := i + 1
-od
+od;
+output := s

@@ -3,6 +3,7 @@
 #include "cfg.hpp"
 #include "symtab.hpp"
 #include "register_allocation.hpp"
+#include "dead_code_elimination.hpp"
 #include <ostream>
 #include <unordered_set>
 
@@ -14,5 +15,6 @@ namespace whilec
                             const SymbolTable &sym,
                             const std::unordered_set<int> &deadLabels,
                             const RegAllocMap &regAlloc,
+                            const LivenessInfo &liv,
                             std::ostream &out);
 }
