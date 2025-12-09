@@ -83,7 +83,13 @@ int main(int argc, char **argv)
 
         // Assembly output
         auto sym = buildSymbolTable(*prog);
-        //  (auto &v : liv.in.at(entry)) {
+        std::unordered_set<std::string> exitLive = {"output"};
+        LivenessInfo liv = computeLiveness(cfg, exitLive);
+
+        // Write entry live-in file
+        std::ofstream f("liveness_entry.txt");
+        int entry = cfg.entry->label; 
+        for (auto &v : liv.in.at(entry)) {
             f << v << " ";
         }
         std::cout << "Wrote liveness_entry.txt\n";

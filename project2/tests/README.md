@@ -28,7 +28,6 @@ The test framework performs the following:
     - Correct prologue: `mv t2, a0`
     - Load/store for variable initialization: `ld` or `sd sX`
     - Control-flow instructions when the source contains `if`/`while`
-  - Records number of memory operations into: `build/memops_summary.csv`
 
   This allows quick verification of correctness and stability after every code change.
   
@@ -70,7 +69,7 @@ AllWhileFiles/WhileFileTest.GenerateAsmAndSanityCheck/stress_loop_countdown (25 
 ```bash
 ../tests/test_runner --gtest_filter=*/stress_square
 
-gcc -O2 -o wh build/tests/stress_square.c build/tests/stress_square.s
+gcc -o wh build/tests/stress_square.c build/tests/stress_square.s
 
 ./wh 0 100000 0 0 0 0 
 ```
@@ -96,62 +95,14 @@ v5=10000000000
 ### stress_square:
 ```bash
 time ./wh 0 100000 0 0 0 0 
-real    0m42.945s
-user    0m42.941s
-sys     0m0.000s
-```
-
-### stress_gcd_sub
-```bash
-time ./wh 0 1 0 100000000 0
-real    0m0.505s
-user    0m0.503s
-sys     0m0.001s
-```
-
-### stress_gcd_mod
-```bash
-time ./wh 0 102334155 0 102334156 0 0
-real    0m0.321s
-user    0m0.320s
-sys     0m0.000s
-```
-
-### stress_prime_count
-```bash
-time ./wh 0 10000 0 0 0 0 0 0 0
-real    0m1.573s
-user    0m1.568s
-sys     0m0.004s
-```
-### stress_factorial:
-```bash
-time ./wh 0 12 0 0 0 0 0
-real    0m1.482s
-user    0m1.477s
-sys     0m0.005s
-```
-
-### stress_factorial:
-```bash
-time ./wh 0 13 0 0 0 0 0
-real    0m19.218s
-user    0m19.210s
-sys     0m0.004s
-```
-
-## Performace Evaluation - Task 11
-### stress_square:
-```bash
-time ./wh 100000
-real    0m42.983s
-user    0m42.929s
+real    0m42.968s
+user    0m42.956s
 sys     0m0.005s
 ```
 
 ### stress_gcd_sub
 ```bash
-time ./wh 1 100000000
+time ./wh 0 1 0 1000000000 0
 real    0m0.505s
 user    0m0.504s
 sys     0m0.001s
@@ -159,8 +110,62 @@ sys     0m0.001s
 
 ### stress_gcd_mod
 ```bash
+time ./wh 0 102334155 0 102334156 0 0
+real    0m0.370s
+user    0m0.365s
+sys     0m0.005s
+```
+
+### stress_prime_count
+```bash
+time ./wh 0 10000 0 0 0 0 0 0 0
+real    0m1.606s
+user    0m1.601s
+sys     0m0.005s
+```
+### stress_factorial:
+```bash
+time ./wh 0 12 0 0 0 0 0
+real    0m1.481s
+user    0m1.480s
+sys     0m0.001s
+```
+
+### stress_factorial:
+```bash
+time ./wh 0 13 0 0 0 0 0
+real    0m19.214s
+user    0m19.204s
+sys     0m0.005s
+```
+### dead_while:
+```bash
+time ./wh 0 1000000000 0 0 0 0 0 0 0 0 0
+real    0m18.657s
+user    0m18.606s
+sys     0m0.005s
+```
+## Performace Evaluation - Task 11
+### stress_square:
+```bash
+time ./wh 100000
+real    0m42.967s
+user    0m42.951s
+sys     0m0.009s
+```
+
+### stress_gcd_sub
+```bash
+time ./wh 1 1000000000
+real    0m5.016s
+user    0m5.010s
+sys     0m0.005s
+```
+
+### stress_gcd_mod
+```bash
 time ./wh 102334155 102334156
-real    0m0.371s
+real    0m0.370s
 user    0m0.369s
 sys     0m0.001s
 ```
@@ -168,14 +173,14 @@ sys     0m0.001s
 ### stress_prime_count
 ```bash
 time ./wh 10000
-real    3m9.131s
-user    3m9.072s
-sys     0m0.029s
+real    0m1.555s
+user    0m1.554s
+sys     0m0.001s
 ```
 ### stress_factorial:
 ```bash
 time ./wh 12
-real    0m1.589s
+real    0m1.481s
 user    0m1.480s
 sys     0m0.001s
 ```
@@ -183,9 +188,9 @@ sys     0m0.001s
 ### stress_factorial:
 ```bash
 time ./wh 13
-real    0m19.217s
-user    0m19.205s
-sys     0m0.009s
+real    0m19.218s
+user    0m19.213s
+sys     0m0.001s
 ```
 ### closest_prime:
 ```bash
@@ -193,4 +198,11 @@ time ./wh 387096383
 real    0m0.004s
 user    0m0.000s
 sys     0m0.003s
+```
+### dead_while
+```bash
+time ./wh 1000000000
+real    0m8.003s
+user    0m7.875s
+sys     0m0.001s
 ```

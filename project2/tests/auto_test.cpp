@@ -14,7 +14,6 @@ namespace fs = std::filesystem;
 
 static const std::string WHILEC_BIN = "../src/whilec";
 static const std::string OUT_ASM = "assemblycode/out_program.s";
-static const std::string CSV_SUMMARY = "build/memops_summary.csv";
 
 static std::pair<int, std::string> run_command_capture(const std::string &cmd)
 {
@@ -51,31 +50,6 @@ static void assert_asm_contains_key_patterns(const std::string &asm_text, const 
         std::regex ctrl(R"(\bbeqz\b|\bj\b|\bbne\b|\bbge\b|\bblt\b)");
         ASSERT_TRUE(std::regex_search(asm_text, ctrl)) << "Missing control-flow branches in asm (source has if/while)";
     }
-}
-
-static int detect_max_sreg(const std::string &asm_text)
-{
-    std::regex sreg(R"(\bs([0-9]+)\b)");
-    std::smatch m;
-    int max_s = -1;
-    int min_s = 1000000;
-
-    auto begin = asm_text.begin();
-    auto end = asm_text.end();
-
-    while (std::regex_search(begin, end, m, sreg))
-    {
-        int id = std::stoi(m[1]);
-        if (id > max_s) max_s = id;
-        if (id < min_s) min_s = id;
-        begin = m.suffix().first;
-    }
-
-    if (max_s < 0) {
-        return 1;
-    }
-
-    return max_s - min_s + 1;
 }
 
 // Harness 
@@ -152,37 +126,13 @@ static std::vector<std::string> read_var_order_from_labeled(const fs::path &lb)
     return std::vector<std::string>(vars.begin(), vars.end());
 }
 
-static std::vector<std::string> read_livein()
+static std::vector<std::string> read_livein(const fs::path &lb)
 {
-    std::ifstream in("liveness_entry.txt");
+    std::ifstream in(lb);
     std::vector<std::string> xs;
     std::string v;
     while (in >> v) xs.push_back(v);
     return xs;
-}
-
-static int count_pseudo_rv_memops(const std::string &asm_text) {
-    std::regex ld_pattern(R"(\bld\s+s[0-9]+)");
-    std::regex sd_pattern(R"(\bsd\s+s[0-9]+)");
-
-    int count = 0;
-
-    auto begin = asm_text.begin();
-    auto end = asm_text.end();
-    std::smatch m;
-
-    while (std::regex_search(begin, end, m, ld_pattern)) {
-        count++;
-        begin = m.suffix().first;
-    }
-
-    begin = asm_text.begin();
-    while (std::regex_search(begin, end, m, sd_pattern)) {
-        count++;
-        begin = m.suffix().first;
-    }
-
-    return count;
 }
 
 // collect tests
@@ -208,34 +158,12 @@ static std::vector<fs::path> collect_all_while_files()
 
 // Parameterized test fixture
 class WhileFileTest : public ::testing::TestWithParam<std::string>
-{
-protected:
-    static bool csv_initialized;
-
-    static void initializeCSV() {
-        if (!csv_initialized) {
-            fs::create_directories("../tests/build");
-            std::ofstream csv(CSV_SUMMARY, std::ios::trunc);
-            csv << "file,memops\n";
-            csv.close();
-            csv_initialized = true;
-        }
-    }
-
-    static void appendCSV(const std::string &file_stem, int memops) {
-        std::ofstream csv(CSV_SUMMARY, std::ios::app);
-        csv << file_stem << "," << memops << "\n";
-    }
-};
-
-bool WhileFileTest::csv_initialized = false;
+{};
 
 TEST_P(WhileFileTest, GenerateAsmAndSanityCheck)
 {
     std::string file = GetParam();
     SCOPED_TRACE(file);
-
-    WhileFileTest::initializeCSV();
 
     if (fs::exists(OUT_ASM))
         fs::remove(OUT_ASM);
@@ -277,15 +205,10 @@ TEST_P(WhileFileTest, GenerateAsmAndSanityCheck)
 
     // asm checks
     assert_asm_contains_key_patterns(asm_text, src_text);
-    int memops = count_pseudo_rv_memops(asm_text);
-    int vars_size = detect_max_sreg(asm_text);
 
-    std::cout << "\n\n[==========] memops=" << memops
-              << ", vars_size=" << vars_size << "\n\n";    
+      
     fs::path p(file);
     std::string stem = p.stem().string();
-
-    WhileFileTest::appendCSV(stem, memops);
 
     int tests_to_run = ::testing::UnitTest::GetInstance()->test_to_run_count();
     bool single_test_run = (tests_to_run == 1);
@@ -296,8 +219,8 @@ TEST_P(WhileFileTest, GenerateAsmAndSanityCheck)
         fs::create_directories(keep_dir);
         
         auto var_order = read_var_order_from_labeled("labeled_program.while");
-        auto livein_vars = read_livein();
-
+        auto livein_vars = read_livein("liveness_entry.txt");
+        int vars_size = var_order.size();
         if (var_order.empty())
         {
             // fallback

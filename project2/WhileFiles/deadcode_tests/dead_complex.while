@@ -1,0 +1,23 @@
+n := input;
+
+a := n;
+b := a + 1;
+i := 0;
+
+while [i < n] do
+  junk1 := a + a + 1;
+  junk2 := n * n;
+  junk3 := a*(a + 1) + i * 100;
+  if [i > i + 1] then
+    a := a + 1
+  else
+    junk4 := a - (a + 1) + i * n
+  fi;
+  next := a + a + 1;
+  a := a;
+  a := next;
+
+  i := i + 1
+od;
+
+output := a

@@ -135,7 +135,7 @@ user    0m1.456s
 sys     0m0.005s
 ```
 
-### madprime:
+### madprimes:
 ```bash
 time ./wh 524287
 real    0m0.035s
