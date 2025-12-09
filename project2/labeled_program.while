@@ -1,3 +1,37 @@
-/*ℓ=0*/ x := 1;
-/*ℓ=1*/ y := 2;
-/*ℓ=2*/ output := x;
+/*ℓ=0*/ mod := input;
+/*ℓ=1*/ while ((not ((mod = 1) or (mod = 0)))) do
+  /*ℓ=2*/ mod := (mod - 2);
+od
+/*ℓ=3*/ if ((mod = 1)) then
+  /*ℓ=4*/ input := (input - 2);
+else
+  /*ℓ=5*/ input := (input - 1);
+fi
+/*ℓ=6*/ i := input;
+/*ℓ=7*/ stop1 := 0;
+/*ℓ=8*/ while (((i >= 2) and (stop1 = 0))) do
+  /*ℓ=9*/ sqrt := 1;
+  /*ℓ=10*/ while (((sqrt * sqrt) <= i)) do
+    /*ℓ=11*/ sqrt := (sqrt + 1);
+  od
+  /*ℓ=12*/ j := 3;
+  /*ℓ=13*/ stop := 0;
+  /*ℓ=14*/ while (((j <= sqrt) and (stop = 0))) do
+    /*ℓ=15*/ mod := i;
+    /*ℓ=16*/ while ((mod > 0)) do
+      /*ℓ=17*/ mod := (mod - j);
+    od
+    /*ℓ=18*/ if ((mod = 0)) then
+      /*ℓ=19*/ stop := 1;
+    else
+      /*ℓ=20*/ j := (j + 2);
+    fi
+  od
+  /*ℓ=21*/ if ((j > sqrt)) then
+    /*ℓ=22*/ stop1 := 1;
+  else
+    /*ℓ=23*/ i := (i - 2);
+  fi
+od
+/*ℓ=24*/ closestprime := i;
+/*ℓ=25*/ output := closestprime;

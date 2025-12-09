@@ -1,6 +1,7 @@
 #include "pseudo_rvgen.hpp"
 #include <algorithm>
 #include <stdexcept>
+#include <unordered_set>
 
 namespace whilec
 {
@@ -273,9 +274,6 @@ namespace whilec
             out << "  addi t2, t2, 8\n";
         }
 
-        if (!cfg.entry)
-            throw std::runtime_error("generate_pseudo_rv: CFG has no entry");
-
         out << "  j    L" << cfg.entry->label << "\n\n";
 
         // Sorted block traversal
@@ -297,6 +295,7 @@ namespace whilec
 
             out << "L" << node->label << ":\n";
             const std::string kind = nodeKind(ast);
+            (void)kind; // currently unused, but kept for clarity
 
             // Assign
             if (auto a = dynamic_cast<const Assign *>(ast))
@@ -365,19 +364,62 @@ namespace whilec
             out << "\n";
         }
 
-        // Epilogue at END_LABEL: write outputs back to a0 array
+        // ===== Epilogue at END_LABEL: only write back exit-live vars =====
         out << END_LABEL << ":\n";
         out << "  mv   t2, a0\n";
 
+        // 1. 从 liveness 结果中推断“程序结束时仍 live 的变量”
+        std::unordered_set<std::string> liveAtExit;
+        for (const auto &kv : cfg.nodes)
+        {
+            const CFGNode *node = kv.second.get();
+            if (node->succ.empty())
+            {
+                int lbl = kv.first;
+                auto it = liv.out.find(lbl);
+                if (it != liv.out.end())
+                {
+                    for (const auto &v : it->second)
+                        liveAtExit.insert(v);
+                }
+            }
+        }
+
+        // 2. 如果 liveness 没有给出任何 exit-live（比如实现有 bug），
+        //    退化为：至少保证 "output" 被写回（因为 main 里就是用 {"output"} 调用的）
+        if (liveAtExit.empty())
+        {
+            for (const auto &nm : names)
+            {
+                if (nm == "output")
+                {
+                    liveAtExit.insert(nm);
+                    break;
+                }
+            }
+        }
+
+        // 3. 只对 exit-live 变量做寄存器回写（spill 变量已经在内存中）
         for (int i = 0; i < nvars; ++i)
         {
+            const std::string &var = names[i];
             int r = alloc[i];
+
+            if (!liveAtExit.empty() && !liveAtExit.count(var))
+            {
+                // 这个变量在程序结束时不再 live，就不用从寄存器写回
+                out << "  # skip dead-at-exit: " << var << "\n";
+                out << "  addi t2, t2, 8\n";
+                continue;
+            }
+
             if (r > 0)
             {
-                out << "  # output (" << names[i] << ") <- s" << r << "\n";
+                out << "  # exit-live (" << var << ") <- s" << r << "\n";
                 out << "  sd   s" << r << ", 0(t2)\n";
             }
-            // spilled vars already kept in memory by storeVar
+            // spill 的变量在执行过程中已经直接写内存，无需额外写回
+
             out << "  addi t2, t2, 8\n";
         }
 
