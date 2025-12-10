@@ -20,12 +20,10 @@ program:
 L0:
   mv   t0, s1
   mv   s1, t0
-  j    L1
 
 L1:
   mv   t0, s2
   mv   s2, t0
-  j    L2
 
 L2:
   mv   t0, s1
@@ -33,7 +31,6 @@ L2:
   li   t0, 0
   sub  t0, t1, t0
   seqz t0, t0
-  snez t0, t0
   xori t0, t0, 1
   beqz t0, L6   # exit
   j    L3           # true -> body

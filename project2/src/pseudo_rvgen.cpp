@@ -17,11 +17,6 @@ namespace whilec
                              const RegAllocMap &alloc,
                              std::ostream &out);
 
-        static void normalize01(std::ostream &out)
-        {
-            out << "  snez t0, t0\n";
-        }
-
         // Load variable into t0, respecting spills.
         static void loadVar(const std::string &name,
                             const SymbolTable &sym,
@@ -128,7 +123,6 @@ namespace whilec
             if (auto u = dynamic_cast<const Not *>(e))
             {
                 evalBExp(u->bexp.get(), sym, alloc, out);
-                out << "  snez t0, t0\n";    // normalize to 0/1
                 out << "  xori t0, t0, 1\n"; // flip
                 return;
             }
@@ -138,19 +132,10 @@ namespace whilec
             {
                 // ---- evaluate left into t0 ----
                 evalBExp(bb->left.get(), sym, alloc, out);
-                out << "  snez t0, t0\n";   // normalize left bool
-
-                // push left_bool on stack
-                out << "  addi sp, sp, -8\n";
-                out << "  sd   t0, 0(sp)\n";
+                out << "  mv t1, t0\n";   // t1 = left
 
                 // ---- evaluate right into t0 ----
                 evalBExp(bb->right.get(), sym, alloc, out);
-                out << "  snez t0, t0\n";   // normalize right bool
-
-                // pop left_bool into t1
-                out << "  ld   t1, 0(sp)\n";
-                out << "  addi sp, sp, 8\n";
 
                 if (bb->op == "and")
                 {
@@ -302,8 +287,11 @@ namespace whilec
                   { return a->label < b->label; });
 
         // Emit each block
-        for (const CFGNode *node : nodes)
+        for (size_t i = 0; i < nodes.size(); ++i)
         {
+            const CFGNode *node = nodes[i];
+            const CFGNode *fallthrough = (i + 1 < nodes.size() ? nodes[i+1] : nullptr);
+            
             const Node *ast = node->ast;
             if (!ast)
                 continue;
@@ -368,7 +356,14 @@ namespace whilec
                 }
                 else if (node->succ.size() == 1)
                 {
-                    out << "  j    L" << node->succ[0]->label << "\n";
+                    const CFGNode *succ = node->succ[0];
+
+                    if (succ == fallthrough)
+                    {
+                        // do nothing, let it fall through to next block
+                    }
+                    else
+                        out << "  j    L" << node->succ[0]->label << "\n";
                 }
                 else
                 {

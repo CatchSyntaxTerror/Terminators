@@ -1,12 +1,10 @@
-/*ℓ=0*/ i := input;
-/*ℓ=1*/ j := input;
-/*ℓ=2*/ sum := 0;
-/*ℓ=3*/ while ((i > 0)) do
-  /*ℓ=4*/ k := j;
-  /*ℓ=5*/ while ((k > 0)) do
-    /*ℓ=6*/ sum := (sum + 1);
-    /*ℓ=7*/ k := (k - 1);
-  od
-  /*ℓ=8*/ i := (i - 1);
+/*ℓ=0*/ a := input;
+/*ℓ=1*/ b := input2;
+/*ℓ=2*/ while ((not (a = 0))) do
+  /*ℓ=3*/ if ((a >= b)) then
+    /*ℓ=4*/ a := (a - b);
+  else
+    /*ℓ=5*/ b := (b - a);
+  fi
 od
-/*ℓ=9*/ output := sum;
+/*ℓ=6*/ output := b;
