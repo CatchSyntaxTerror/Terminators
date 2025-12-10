@@ -383,7 +383,6 @@ namespace whilec
         out << END_LABEL << ":\n";
         out << "  mv   t2, a0\n";
 
-        // 1. 从 liveness 结果中推断“程序结束时仍 live 的变量”
         std::unordered_set<std::string> liveAtExit;
         for (const auto &kv : cfg.nodes)
         {
@@ -400,8 +399,6 @@ namespace whilec
             }
         }
 
-        // 2. 如果 liveness 没有给出任何 exit-live（比如实现有 bug），
-        //    退化为：至少保证 "output" 被写回（因为 main 里就是用 {"output"} 调用的）
         if (liveAtExit.empty())
         {
             for (const auto &nm : names)
@@ -414,7 +411,6 @@ namespace whilec
             }
         }
 
-        // 3. 只对 exit-live 变量做寄存器回写（spill 变量已经在内存中）
         for (int i = 0; i < nvars; ++i)
         {
             const std::string &var = names[i];
@@ -422,7 +418,6 @@ namespace whilec
 
             if (!liveAtExit.empty() && !liveAtExit.count(var))
             {
-                // 这个变量在程序结束时不再 live，就不用从寄存器写回
                 out << "  # skip dead-at-exit: " << var << "\n";
                 out << "  addi t2, t2, 8\n";
                 continue;
@@ -433,7 +428,6 @@ namespace whilec
                 out << "  # exit-live (" << var << ") <- s" << r << "\n";
                 out << "  sd   s" << r << ", 0(t2)\n";
             }
-            // spill 的变量在执行过程中已经直接写内存，无需额外写回
 
             out << "  addi t2, t2, 8\n";
         }
