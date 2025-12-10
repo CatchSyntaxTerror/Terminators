@@ -95,71 +95,80 @@ v5=10000000000
 ### stress_square:
 ```bash
 time ./wh 0 100000 0 0 0 0 
-real    0m42.968s
-user    0m42.956s
-sys     0m0.005s
+real    0m42.965s
+user    0m42.949s
+sys     0m0.008s
 ```
 
 ### stress_gcd_sub
 ```bash
 time ./wh 0 1 0 1000000000 0
-real    0m0.505s
-user    0m0.504s
-sys     0m0.001s
+real    0m5.819s
+user    0m5.729s
+sys     0m0.000s
 ```
 
 ### stress_gcd_mod
 ```bash
 time ./wh 0 102334155 0 102334156 0 0
-real    0m0.370s
-user    0m0.365s
-sys     0m0.005s
+real    0m0.371s
+user    0m0.369s
+sys     0m0.001s
 ```
 
 ### stress_prime_count
 ```bash
 time ./wh 0 10000 0 0 0 0 0 0 0
 real    0m1.606s
-user    0m1.601s
-sys     0m0.005s
+user    0m1.604s
+sys     0m0.001s
 ```
 ### stress_factorial:
 ```bash
 time ./wh 0 12 0 0 0 0 0
-real    0m1.481s
-user    0m1.480s
-sys     0m0.001s
+real    0m1.482s
+user    0m1.481s
+sys     0m0.000s
 ```
 
 ### stress_factorial:
 ```bash
 time ./wh 0 13 0 0 0 0 0
-real    0m19.214s
-user    0m19.204s
-sys     0m0.005s
+real    0m19.221s
+user    0m19.208s
+sys     0m0.009s
 ```
+
+### closest_prime:
+```bash
+time ./wh 0 387096383 0 0 0 0 0 0 0
+real    2m33.711s
+user    2m33.650s
+sys     0m0.036s
+```
+
 ### dead_while:
 ```bash
 time ./wh 0 1000000000 0 0 0 0 0 0 0 0 0
-real    0m18.657s
-user    0m18.606s
-sys     0m0.005s
+real    0m18.623s
+user    0m18.607s
+sys     0m0.013s
 ```
 ## Performace Evaluation - Task 11
 ### stress_square:
 ```bash
 time ./wh 100000
-real    0m42.967s
+real    0m42.963s
 user    0m42.951s
-sys     0m0.009s
+sys     0m0.004s
 ```
 
 ### stress_gcd_sub
 ```bash
 time ./wh 1 1000000000
-real    0m5.016s
-user    0m5.010s
-sys     0m0.005s
+real    0m5.015s
+user    0m5.005s
+sys     0m0.009s
 ```
 
 ### stress_gcd_mod
@@ -167,42 +176,42 @@ sys     0m0.005s
 time ./wh 102334155 102334156
 real    0m0.370s
 user    0m0.369s
-sys     0m0.001s
+sys     0m0.000s
 ```
 
 ### stress_prime_count
 ```bash
 time ./wh 10000
-real    0m1.555s
-user    0m1.554s
-sys     0m0.001s
+real    0m1.556s
+user    0m1.551s
+sys     0m0.004s
 ```
 ### stress_factorial:
 ```bash
 time ./wh 12
-real    0m1.481s
-user    0m1.480s
-sys     0m0.001s
+real    0m1.482s
+user    0m1.481s
+sys     0m0.000s
 ```
 
 ### stress_factorial:
 ```bash
 time ./wh 13
 real    0m19.218s
-user    0m19.213s
-sys     0m0.001s
+user    0m19.210s
+sys     0m0.004s
 ```
 ### closest_prime:
 ```bash
 time ./wh 387096383
-real    0m0.004s
-user    0m0.000s
-sys     0m0.003s
+real    2m33.619s
+user    2m33.613s
+sys     0m0.004s
 ```
 ### dead_while
 ```bash
 time ./wh 1000000000
-real    0m8.003s
-user    0m7.875s
-sys     0m0.001s
+real    0m7.882s
+user    0m7.871s
+sys     0m0.009s
 ```

@@ -156,32 +156,24 @@ L19:
 
 L_end:
   mv   t2, a0
-  # output (c) <- s2
-  sd   s2, 0(t2)
+  # skip dead-at-exit: c
   addi t2, t2, 8
-  # output (count) <- s1
+  # skip dead-at-exit: count
+  addi t2, t2, 8
+  # skip dead-at-exit: d
+  addi t2, t2, 8
+  # skip dead-at-exit: dm1
+  addi t2, t2, 8
+  # skip dead-at-exit: input
+  addi t2, t2, 8
+  # skip dead-at-exit: isprime
+  addi t2, t2, 8
+  # skip dead-at-exit: n
+  addi t2, t2, 8
+  # exit-live (output) <- s1
   sd   s1, 0(t2)
   addi t2, t2, 8
-  # output (d) <- s3
-  sd   s3, 0(t2)
-  addi t2, t2, 8
-  # output (dm1) <- s4
-  sd   s4, 0(t2)
-  addi t2, t2, 8
-  # output (input) <- s1
-  sd   s1, 0(t2)
-  addi t2, t2, 8
-  # output (isprime) <- s5
-  sd   s5, 0(t2)
-  addi t2, t2, 8
-  # output (n) <- s2
-  sd   s2, 0(t2)
-  addi t2, t2, 8
-  # output (output) <- s1
-  sd   s1, 0(t2)
-  addi t2, t2, 8
-  # output (rem) <- s6
-  sd   s6, 0(t2)
+  # skip dead-at-exit: rem
   addi t2, t2, 8
   # restore used s-registers
   ld   s1, 0(sp)

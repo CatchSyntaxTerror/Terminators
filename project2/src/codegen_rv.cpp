@@ -32,82 +32,129 @@ namespace whilec
             out << "  snez t0, t0\n";
         }
 
-        // expressions -> t0
+         // expressions -> t0
         static void evalAExp(const Node *e, const SymbolTable &sym, std::ostream &out)
         {
-            // Int
+            // Integer literal
             if (auto k = dynamic_cast<const Int *>(e))
             {
-                out << "  li   t0, " << k->val << "\n";
+                out << "  li t0, " << k->val << "\n";
                 return;
             }
-            // Var
+
+            // Variable
             if (auto v = dynamic_cast<const Var *>(e))
             {
                 emitAddrOf(v->name, sym, out);
-                out << "  ld   t0, 0(t2)\n";
+                out << "  ld t0, 0(t2)\n";
                 return;
             }
+
             // a1 (+|-|*) a2
             if (auto ab = dynamic_cast<const ABin *>(e))
             {
                 evalAExp(ab->left.get(), sym, out);
-                out << "  mv   t1, t0\n";
-                evalAExp(ab->right.get(), sym, out); 
+                out << "  mv t1, t0\n";
 
-                if (ab->op == "+")      { out << "  add  t0, t1, t0\n"; return; }
-                else if (ab->op == "-") { out << "  sub  t0, t1, t0\n"; return; }
-                else if (ab->op == "*") { out << "  mul  t0, t1, t0\n"; return; }
-                throw std::runtime_error("ABin: unsupported op: " + ab->op);
-            }
-            // Bool literal
-            if (auto b = dynamic_cast<const Bool *>(e))
-            {
-                out << "  li   t0, " << (b->val ? 1 : 0) << "\n";
+                evalAExp(ab->right.get(), sym, out);
+
+                if (ab->op == "+")
+                    out << "  add t0, t1, t0\n";
+                else if (ab->op == "-")
+                    out << "  sub t0, t1, t0\n";
+                else if (ab->op == "*")
+                    out << "  mul t0, t1, t0\n";
+                else
+                    throw std::runtime_error("Unknown arithmetic operator");
+
                 return;
             }
-            // not
-            if (auto u = dynamic_cast<const Not *>(e))
-            {
-                evalAExp(u->bexp.get(), sym, out);
-                normalize01(out);
-                out << "  xori t0, t0, 1\n";
-                return;
-            }
-            // b1 and|or b2
-            if (auto bb = dynamic_cast<const BBin *>(e))
-            {
-                evalAExp(bb->left.get(), sym, out);
-                out << "  mv   t1, t0\n";
-                evalAExp(bb->right.get(), sym, out);
-                out << "  snez t1, t1\n";
-                out << "  snez t0, t0\n";
-                if (bb->op == "and") { out << "  and  t0, t1, t0\n"; return; }
-                if (bb->op == "or")  { out << "  or   t0, t1, t0\n";  return; }
-                throw std::runtime_error("BBin: unsupported op: " + bb->op);
-            }
-            // relations: =, <, <=, >, >=
-            if (auto r = dynamic_cast<const Rel *>(e))
-            {
-                evalAExp(r->left.get(), sym, out);
-                out << "  mv   t1, t0\n";
-                evalAExp(r->right.get(), sym, out);
-
-                if      (r->op == "=")  { out << "  sub  t0, t1, t0\n"; out << "  seqz t0, t0\n"; return; }
-                else if (r->op == "<")  { out << "  slt  t0, t1, t0\n"; return; }
-                else if (r->op == "<=") { out << "  slt  t0, t0, t1\n"; out << "  xori t0, t0, 1\n"; return; }
-                else if (r->op == ">")  { out << "  slt  t0, t0, t1\n"; return; }
-                else if (r->op == ">=") { out << "  slt  t0, t1, t0\n"; out << "  xori t0, t0, 1\n"; return; }
-                throw std::runtime_error("Rel: unsupported op: " + r->op);
-            }
-
-            throw std::runtime_error("NYI: expression kind");
+            
+            throw std::runtime_error("evalAExp: unexpected expression type");
         }
 
         static void evalBExp(const Node *e, const SymbolTable &sym, std::ostream &out)
         {
+            // Boolean literal
+            if (auto b = dynamic_cast<const Bool *>(e))
+            {
+                out << "  li t0, " << (b->val ? 1 : 0) << "\n";
+                return;
+            }
+
+            // not(B)
+            if (auto n = dynamic_cast<const Not *>(e))
+            {
+                evalBExp(n->bexp.get(), sym, out);
+                out << "  snez t0, t0\n";
+                out << "  xori t0, t0, 1\n"; 
+                return;
+            }
+
+            // B1 and/or B2
+            if (auto bb = dynamic_cast<const BBin *>(e))
+            {
+                // LEFT
+                evalBExp(bb->left.get(), sym, out);
+                out << "  snez t0, t0\n"; 
+                out << "  addi sp, sp, -8\n";
+                out << "  sd   t0, 0(sp)\n";
+
+                // RIGHT 
+                evalBExp(bb->right.get(), sym, out);
+                out << "  snez t0, t0\n";
+                out << "  ld   t1, 0(sp)\n";
+                out << "  addi sp, sp, 8\n";
+                
+                if (bb->op == "and")
+                    out << "  and t0, t1, t0\n";
+                else if (bb->op == "or")
+                    out << "  or  t0, t1, t0\n";
+                else
+                    throw std::runtime_error("Unknown boolean operator");
+
+                return;
+            }
+
+            // Relational ops
+            if (auto r = dynamic_cast<const Rel *>(e))
+            {
+                evalAExp(r->left.get(), sym, out);
+                out << "  mv t1, t0\n";
+
+                evalAExp(r->right.get(), sym, out);
+
+                if (r->op == "=")
+                {
+                    out << "  sub t0, t1, t0\n";
+                    out << "  seqz t0, t0\n";
+                }
+                else if (r->op == "<")
+                {
+                    out << "  slt t0, t1, t0\n";
+                }
+                else if (r->op == "<=")
+                {
+                    out << "  slt t0, t0, t1\n";
+                    out << "  xori t0, t0, 1\n";
+                }
+                else if (r->op == ">")
+                {
+                    out << "  slt t0, t0, t1\n";
+                }
+                else if (r->op == ">=")
+                {
+                    out << "  slt t0, t1, t0\n";
+                    out << "  xori t0, t0, 1\n";
+                }
+                else
+                    throw std::runtime_error("Unknown relational operator");
+
+                return;
+            }
+            // fallback 
             evalAExp(e, sym, out);
-            normalize01(out);
+            out << "  snez t0, t0\n";
         }
 
         // assignment

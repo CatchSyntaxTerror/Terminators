@@ -34,14 +34,17 @@ L1:
   li   t0, 1
   sub  t0, t1, t0
   seqz t0, t0
-  mv   t1, t0
+  snez t0, t0
+  addi sp, sp, -8
+  sd   t0, 0(sp)
   mv   t0, s1
   mv   t1, t0
   li   t0, 0
   sub  t0, t1, t0
   seqz t0, t0
-  snez t1, t1
   snez t0, t0
+  ld   t1, 0(sp)
+  addi sp, sp, 8
   or   t0, t1, t0
   snez t0, t0
   xori t0, t0, 1
@@ -97,14 +100,17 @@ L8:
   li   t0, 2
   slt  t0, t1, t0
   xori t0, t0, 1
-  mv   t1, t0
+  snez t0, t0
+  addi sp, sp, -8
+  sd   t0, 0(sp)
   mv   t0, s6
   mv   t1, t0
   li   t0, 0
   sub  t0, t1, t0
   seqz t0, t0
-  snez t1, t1
   snez t0, t0
+  ld   t1, 0(sp)
+  addi sp, sp, 8
   and  t0, t1, t0
   beqz t0, L24   # exit
   j    L9           # true -> body
@@ -150,14 +156,17 @@ L14:
   mv   t0, s4
   slt  t0, t0, t1
   xori t0, t0, 1
-  mv   t1, t0
+  snez t0, t0
+  addi sp, sp, -8
+  sd   t0, 0(sp)
   mv   t0, s5
   mv   t1, t0
   li   t0, 0
   sub  t0, t1, t0
   seqz t0, t0
-  snez t1, t1
   snez t0, t0
+  ld   t1, 0(sp)
+  addi sp, sp, 8
   and  t0, t1, t0
   beqz t0, L21   # exit
   j    L15           # true -> body
@@ -238,32 +247,24 @@ L25:
 
 L_end:
   mv   t2, a0
-  # output (closestprime) <- s1
+  # skip dead-at-exit: closestprime
+  addi t2, t2, 8
+  # skip dead-at-exit: i
+  addi t2, t2, 8
+  # skip dead-at-exit: input
+  addi t2, t2, 8
+  # skip dead-at-exit: j
+  addi t2, t2, 8
+  # skip dead-at-exit: mod
+  addi t2, t2, 8
+  # exit-live (output) <- s1
   sd   s1, 0(t2)
   addi t2, t2, 8
-  # output (i) <- s2
-  sd   s2, 0(t2)
+  # skip dead-at-exit: sqrt
   addi t2, t2, 8
-  # output (input) <- s2
-  sd   s2, 0(t2)
+  # skip dead-at-exit: stop
   addi t2, t2, 8
-  # output (j) <- s3
-  sd   s3, 0(t2)
-  addi t2, t2, 8
-  # output (mod) <- s1
-  sd   s1, 0(t2)
-  addi t2, t2, 8
-  # output (output) <- s1
-  sd   s1, 0(t2)
-  addi t2, t2, 8
-  # output (sqrt) <- s4
-  sd   s4, 0(t2)
-  addi t2, t2, 8
-  # output (stop) <- s5
-  sd   s5, 0(t2)
-  addi t2, t2, 8
-  # output (stop1) <- s6
-  sd   s6, 0(t2)
+  # skip dead-at-exit: stop1
   addi t2, t2, 8
   # restore used s-registers
   ld   s1, 0(sp)

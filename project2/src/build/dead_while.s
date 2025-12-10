@@ -95,38 +95,28 @@ L12:
 
 L_end:
   mv   t2, a0
-  # output (i) <- s1
+  # skip dead-at-exit: i
+  addi t2, t2, 8
+  # skip dead-at-exit: input
+  addi t2, t2, 8
+  # skip dead-at-exit: junk1
+  addi t2, t2, 8
+  # skip dead-at-exit: junk2
+  addi t2, t2, 8
+  # skip dead-at-exit: junk3
+  addi t2, t2, 8
+  # skip dead-at-exit: junk4
+  addi t2, t2, 8
+  # skip dead-at-exit: n
+  addi t2, t2, 8
+  # exit-live (output) <- s1
   sd   s1, 0(t2)
   addi t2, t2, 8
-  # output (input) <- s1
-  sd   s1, 0(t2)
+  # skip dead-at-exit: sum
   addi t2, t2, 8
-  # output (junk1) <- s1
-  sd   s1, 0(t2)
+  # skip dead-at-exit: x
   addi t2, t2, 8
-  # output (junk2) <- s1
-  sd   s1, 0(t2)
-  addi t2, t2, 8
-  # output (junk3) <- s1
-  sd   s1, 0(t2)
-  addi t2, t2, 8
-  # output (junk4) <- s1
-  sd   s1, 0(t2)
-  addi t2, t2, 8
-  # output (n) <- s2
-  sd   s2, 0(t2)
-  addi t2, t2, 8
-  # output (output) <- s1
-  sd   s1, 0(t2)
-  addi t2, t2, 8
-  # output (sum) <- s3
-  sd   s3, 0(t2)
-  addi t2, t2, 8
-  # output (x) <- s4
-  sd   s4, 0(t2)
-  addi t2, t2, 8
-  # output (y) <- s5
-  sd   s5, 0(t2)
+  # skip dead-at-exit: y
   addi t2, t2, 8
   # restore used s-registers
   ld   s1, 0(sp)

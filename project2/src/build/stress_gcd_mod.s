@@ -79,23 +79,18 @@ L8:
 
 L_end:
   mv   t2, a0
-  # output (a) <- s1
+  # skip dead-at-exit: a
+  addi t2, t2, 8
+  # skip dead-at-exit: b
+  addi t2, t2, 8
+  # skip dead-at-exit: input
+  addi t2, t2, 8
+  # skip dead-at-exit: input2
+  addi t2, t2, 8
+  # exit-live (output) <- s1
   sd   s1, 0(t2)
   addi t2, t2, 8
-  # output (b) <- s2
-  sd   s2, 0(t2)
-  addi t2, t2, 8
-  # output (input) <- s1
-  sd   s1, 0(t2)
-  addi t2, t2, 8
-  # output (input2) <- s2
-  sd   s2, 0(t2)
-  addi t2, t2, 8
-  # output (output) <- s1
-  sd   s1, 0(t2)
-  addi t2, t2, 8
-  # output (t) <- s3
-  sd   s3, 0(t2)
+  # skip dead-at-exit: t
   addi t2, t2, 8
   # restore used s-registers
   ld   s1, 0(sp)
