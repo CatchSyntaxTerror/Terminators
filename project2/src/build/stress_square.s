@@ -21,17 +21,14 @@ program:
 L0:
   mv   t0, s2
   mv   s1, t0
-  j    L1
 
 L1:
   mv   t0, s2
   mv   s2, t0
-  j    L2
 
 L2:
   li   t0, 0
   mv   s4, t0
-  j    L3
 
 L3:
   mv   t0, s1
@@ -44,7 +41,6 @@ L3:
 L4:
   mv   t0, s2
   mv   s3, t0
-  j    L5
 
 L5:
   mv   t0, s3
@@ -60,7 +56,6 @@ L6:
   li   t0, 1
   add  t0, t1, t0
   mv   s4, t0
-  j    L7
 
 L7:
   mv   t0, s3

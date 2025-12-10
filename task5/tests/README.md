@@ -91,9 +91,9 @@ sys     0m0.009s
 ### stress_gcd_sub
 ```bash
 time ./wh 1 100000000
-real    0m0.935s
-user    0m0.929s
-sys     0m0.005s
+real    0m10.744s
+user    0m10.742s
+sys     0m0.000s
 ```
 
 ### stress_gcd_mod

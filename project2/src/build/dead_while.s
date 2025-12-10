@@ -27,27 +27,22 @@ program:
 L0:
   mv   t0, s1
   mv   s2, t0
-  j    L1
 
 L1:
   li   t0, 0
   mv   s1, t0
-  j    L2
 
 L2:
   li   t0, 1
   mv   s4, t0
-  j    L3
 
 L3:
   li   t0, 2
   mv   s5, t0
-  j    L4
 
 L4:
   li   t0, 0
   mv   s3, t0
-  j    L5
 
 L5:
   mv   t0, s1
@@ -58,16 +53,12 @@ L5:
   j    L6           # true -> body
 
 L6:
-  j    L7
 
 L7:
-  j    L8
 
 L8:
-  j    L9
 
 L9:
-  j    L10
 
 L10:
   mv   t0, s3
@@ -78,7 +69,6 @@ L10:
   mv   t0, s5
   add  t0, t1, t0
   mv   s3, t0
-  j    L11
 
 L11:
   mv   t0, s1

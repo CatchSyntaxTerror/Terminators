@@ -123,6 +123,7 @@ namespace whilec
             if (auto u = dynamic_cast<const Not *>(e))
             {
                 evalBExp(u->bexp.get(), sym, alloc, out);
+                out << "  snez t0, t0\n";    // normalize to 0/1
                 out << "  xori t0, t0, 1\n"; // flip
                 return;
             }
@@ -132,10 +133,19 @@ namespace whilec
             {
                 // ---- evaluate left into t0 ----
                 evalBExp(bb->left.get(), sym, alloc, out);
-                out << "  mv t1, t0\n"; // t1 = left
+                out << "  snez t0, t0\n";   // normalize left bool
+
+                // push left_bool on stack
+                out << "  addi sp, sp, -8\n";
+                out << "  sd   t0, 0(sp)\n";
 
                 // ---- evaluate right into t0 ----
                 evalBExp(bb->right.get(), sym, alloc, out);
+                out << "  snez t0, t0\n";   // normalize right bool
+
+                // pop left_bool into t1
+                out << "  ld   t1, 0(sp)\n";
+                out << "  addi sp, sp, 8\n";
 
                 if (bb->op == "and")
                 {
@@ -267,7 +277,7 @@ namespace whilec
 
             if (r > 0 && liveInEntry.count(name))
             {
-                out << "  # s" << r << " <- input (" << name << ")\n";
+                out << "  # s" << r << " <- input (" << names[i] << ")\n";
                 out << "  ld   s" << r << ", 0(t2)\n";
             }
 

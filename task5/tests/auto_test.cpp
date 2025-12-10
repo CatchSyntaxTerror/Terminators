@@ -14,7 +14,6 @@ namespace fs = std::filesystem;
 
 static const std::string WHILEC_BIN = "./bin/whilec";
 static const std::string OUT_ASM = "out_program.s";
-static const std::string CSV_SUMMARY = "memops_summary.csv";
 
 static std::pair<int, std::string> run_command_capture(const std::string &cmd)
 {
@@ -159,30 +158,6 @@ static void write_harness_c_from_asm(int vars_size,
     f.close();
 }
 
-static int count_codegen_rv_memops(const std::string &asm_text) {
-    std::regex ld_pattern(R"(\bld\s+t[0-9]+)");
-    std::regex sd_pattern(R"(\bsd\s+t[0-9]+)");
-
-    int count = 0;
-
-    auto begin = asm_text.begin();
-    auto end = asm_text.end();
-    std::smatch m;
-
-    while (std::regex_search(begin, end, m, ld_pattern)) {
-        count++;
-        begin = m.suffix().first;
-    }
-
-    begin = asm_text.begin();
-    while (std::regex_search(begin, end, m, sd_pattern)) {
-        count++;
-        begin = m.suffix().first;
-    }
-
-    return count;
-}
-
 // collect tests
 static std::vector<fs::path> collect_all_while_files()
 {
@@ -207,33 +182,12 @@ static std::vector<fs::path> collect_all_while_files()
 // Parameterized test fixture
 class WhileFileTest : public ::testing::TestWithParam<std::string>
 {
-protected:
-    static bool csv_initialized;
-
-    static void initializeCSV() {
-        if (!csv_initialized) {
-            fs::create_directories("../tests/build");
-            std::ofstream csv(CSV_SUMMARY, std::ios::trunc);
-            csv << "file,memops\n";
-            csv.close();
-            csv_initialized = true;
-        }
-    }
-
-    static void appendCSV(const std::string &file_stem, int memops) {
-        std::ofstream csv(CSV_SUMMARY, std::ios::app);
-        csv << file_stem << "," << memops << "\n";
-    }
 };
-
-bool WhileFileTest::csv_initialized = false;
 
 TEST_P(WhileFileTest, GenerateAsmAndSanityCheck)
 {
     std::string file = GetParam();
     SCOPED_TRACE(file);
-   
-    WhileFileTest::initializeCSV();
 
     // compile while file -> out_program.s
     std::ostringstream cmd;
@@ -259,24 +213,17 @@ TEST_P(WhileFileTest, GenerateAsmAndSanityCheck)
 
     // asm checks
     assert_asm_contains_key_patterns(asm_text, src_text);
-    int memops = count_codegen_rv_memops(asm_text);
 
-    std::cout << "\n\n[==========]" << memops << "\n\n";
-    fs::path p(file);
-    std::string stem = p.stem().string();
-
-    WhileFileTest::appendCSV(stem, memops);
-    
     int tests_to_run = ::testing::UnitTest::GetInstance()->test_to_run_count();
     bool single_test_run = (tests_to_run == 1);
 
     if (single_test_run)
     {
-        fs::path keep_dir = "build/tests";
+        fs::path keep_dir = "build";
         fs::create_directories(keep_dir);
 
-        // fs::path p(file);
-        // std::string stem = p.stem().string();
+        fs::path p(file);
+        std::string stem = p.stem().string();
 
         // analyze inputs directly from assembly
         AsmInputs ai = analyze_inputs_from_asm(asm_text);

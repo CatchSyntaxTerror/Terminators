@@ -26,17 +26,14 @@ program:
 L0:
   mv   t0, s1
   mv   s2, t0
-  j    L1
 
 L1:
   li   t0, 0
   mv   s1, t0
-  j    L2
 
 L2:
   mv   t0, s2
   mv   s2, t0
-  j    L3
 
 L3:
   mv   t0, s2
@@ -49,7 +46,6 @@ L3:
 L4:
   li   t0, 1
   mv   s5, t0
-  j    L5
 
 L5:
   mv   t0, s2
@@ -57,7 +53,6 @@ L5:
   li   t0, 1
   sub  t0, t1, t0
   mv   s3, t0
-  j    L6
 
 L6:
   mv   t0, s3
@@ -70,7 +65,6 @@ L6:
 L7:
   mv   t0, s2
   mv   s6, t0
-  j    L8
 
 L8:
   mv   t0, s3
@@ -78,7 +72,6 @@ L8:
   li   t0, 1
   sub  t0, t1, t0
   mv   s4, t0
-  j    L9
 
 L9:
   mv   t0, s6
@@ -111,7 +104,6 @@ L12:
   j    L14
 
 L13:
-  j    L14
 
 L14:
   mv   t0, s3
@@ -139,7 +131,6 @@ L16:
   j    L18
 
 L17:
-  j    L18
 
 L18:
   mv   t0, s2

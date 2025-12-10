@@ -31,6 +31,7 @@ L2:
   li   t0, 0
   sub  t0, t1, t0
   seqz t0, t0
+  snez t0, t0
   xori t0, t0, 1
   beqz t0, L6   # exit
   j    L3           # true -> body
