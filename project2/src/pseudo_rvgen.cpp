@@ -112,53 +112,67 @@ namespace whilec
             throw std::runtime_error("Unsupported arithmetic expression node");
         }
 
-        // ===== boolean expressions =====
         static void evalBExp(const Node *e,
-                             const SymbolTable &sym,
-                             const RegAllocMap &alloc,
-                             std::ostream &out)
+                            const SymbolTable &sym,
+                            const RegAllocMap &alloc,
+                            std::ostream &out)
         {
+            // ===== Boolean literal =====
             if (auto b = dynamic_cast<const Bool *>(e))
             {
                 out << "  li   t0, " << (b->val ? 1 : 0) << "\n";
                 return;
             }
 
+            // ===== NOT =====
             if (auto u = dynamic_cast<const Not *>(e))
             {
                 evalBExp(u->bexp.get(), sym, alloc, out);
-                normalize01(out);
-                out << "  xori t0, t0, 1\n";
+                out << "  snez t0, t0\n";    // normalize to 0/1
+                out << "  xori t0, t0, 1\n"; // flip
                 return;
             }
 
+            // ===== Binary boolean operators (AND / OR) =====
             if (auto bb = dynamic_cast<const BBin *>(e))
             {
+                // ---- evaluate left into t0 ----
                 evalBExp(bb->left.get(), sym, alloc, out);
-                out << "  mv   t1, t0\n";
+                out << "  snez t0, t0\n";   // normalize left bool
+
+                // push left_bool on stack
+                out << "  addi sp, sp, -8\n";
+                out << "  sd   t0, 0(sp)\n";
+
+                // ---- evaluate right into t0 ----
                 evalBExp(bb->right.get(), sym, alloc, out);
-                out << "  snez t1, t1\n";
-                out << "  snez t0, t0\n";
+                out << "  snez t0, t0\n";   // normalize right bool
+
+                // pop left_bool into t1
+                out << "  ld   t1, 0(sp)\n";
+                out << "  addi sp, sp, 8\n";
 
                 if (bb->op == "and")
                 {
-                    out << "  and  t0, t1, t0\n";
+                    out << "  and  t0, t1, t0\n";  // t0 = left & right
                     return;
                 }
+
                 if (bb->op == "or")
                 {
-                    out << "  or   t0, t1, t0\n";
+                    out << "  or   t0, t1, t0\n";  // t0 = left | right
                     return;
                 }
 
                 throw std::runtime_error("Unsupported boolean op: " + bb->op);
             }
 
+            // ===== Relational operators (=,<,<=,>,>=) =====
             if (auto r = dynamic_cast<const Rel *>(e))
             {
-                evalAExp(r->left.get(), sym, alloc, out);
-                out << "  mv   t1, t0\n";
-                evalAExp(r->right.get(), sym, alloc, out);
+                evalAExp(r->left.get(), sym, alloc, out);   // t0 = left
+                out << "  mv   t1, t0\n";                  // t1 = left
+                evalAExp(r->right.get(), sym, alloc, out); // t0 = right
 
                 if (r->op == "=")
                 {
@@ -168,34 +182,35 @@ namespace whilec
                 }
                 if (r->op == "<")
                 {
-                    out << "  slt  t0, t1, t0\n";
+                    out << "  slt  t0, t1, t0\n"; // left < right
                     return;
                 }
                 if (r->op == "<=")
                 {
-                    out << "  slt  t0, t0, t1\n";
-                    out << "  xori t0, t0, 1\n";
+                    out << "  slt  t0, t0, t1\n"; // right < left
+                    out << "  xori t0, t0, 1\n";  // not(right<left)
                     return;
                 }
                 if (r->op == ">")
                 {
-                    out << "  slt  t0, t0, t1\n";
+                    out << "  slt  t0, t0, t1\n"; // right < left
                     return;
                 }
                 if (r->op == ">=")
                 {
-                    out << "  slt  t0, t1, t0\n";
-                    out << "  xori t0, t0, 1\n";
+                    out << "  slt  t0, t1, t0\n"; // left < right
+                    out << "  xori t0, t0, 1\n";  // not(left<right)
                     return;
                 }
 
                 throw std::runtime_error("Unsupported relation op: " + r->op);
             }
 
-            // Fallback: interpret e as arithmetic and normalize to 0/1.
+            // ===== fallback: treat arithmetic as boolean =====
             evalAExp(e, sym, alloc, out);
-            normalize01(out);
+            out << "  snez t0, t0\n";
         }
+
 
         static std::string nodeKind(const Node *n)
         {
