@@ -108,9 +108,9 @@ namespace whilec
         }
 
         static void evalBExp(const Node *e,
-                            const SymbolTable &sym,
-                            const RegAllocMap &alloc,
-                            std::ostream &out)
+                             const SymbolTable &sym,
+                             const RegAllocMap &alloc,
+                             std::ostream &out)
         {
             // ===== Boolean literal =====
             if (auto b = dynamic_cast<const Bool *>(e))
@@ -132,20 +132,20 @@ namespace whilec
             {
                 // ---- evaluate left into t0 ----
                 evalBExp(bb->left.get(), sym, alloc, out);
-                out << "  mv t1, t0\n";   // t1 = left
+                out << "  mv t1, t0\n"; // t1 = left
 
                 // ---- evaluate right into t0 ----
                 evalBExp(bb->right.get(), sym, alloc, out);
 
                 if (bb->op == "and")
                 {
-                    out << "  and  t0, t1, t0\n";  // t0 = left & right
+                    out << "  and  t0, t1, t0\n"; // t0 = left & right
                     return;
                 }
 
                 if (bb->op == "or")
                 {
-                    out << "  or   t0, t1, t0\n";  // t0 = left | right
+                    out << "  or   t0, t1, t0\n"; // t0 = left | right
                     return;
                 }
 
@@ -155,7 +155,7 @@ namespace whilec
             // ===== Relational operators (=,<,<=,>,>=) =====
             if (auto r = dynamic_cast<const Rel *>(e))
             {
-                evalAExp(r->left.get(), sym, alloc, out);   // t0 = left
+                evalAExp(r->left.get(), sym, alloc, out);  // t0 = left
                 out << "  mv   t1, t0\n";                  // t1 = left
                 evalAExp(r->right.get(), sym, alloc, out); // t0 = right
 
@@ -195,7 +195,6 @@ namespace whilec
             evalAExp(e, sym, alloc, out);
             out << "  snez t0, t0\n";
         }
-
 
         static std::string nodeKind(const Node *n)
         {
@@ -268,9 +267,11 @@ namespace whilec
 
             if (r > 0 && liveInEntry.count(name))
             {
-                out << "  # s" << r << " <- input (" << names[i] << ")\n";
+                out << "  # s" << r << " <- input (" << name << ")\n";
                 out << "  ld   s" << r << ", 0(t2)\n";
             }
+
+            // increment t2
             out << "  addi t2, t2, 8\n";
         }
 
@@ -290,8 +291,8 @@ namespace whilec
         for (size_t i = 0; i < nodes.size(); ++i)
         {
             const CFGNode *node = nodes[i];
-            const CFGNode *fallthrough = (i + 1 < nodes.size() ? nodes[i+1] : nullptr);
-            
+            const CFGNode *fallthrough = (i + 1 < nodes.size() ? nodes[i + 1] : nullptr);
+
             const Node *ast = node->ast;
             if (!ast)
                 continue;
