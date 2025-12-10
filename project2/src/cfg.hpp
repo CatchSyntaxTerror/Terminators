@@ -6,7 +6,6 @@
 #include "ast.hpp"
 /**
  * cfg data structure. 
- * This can make new nodes but is mostly used to make a CFG of the decorated ast
  */
 namespace whilec {
 
@@ -26,7 +25,6 @@ namespace whilec {
         CFGNode* stop = nullptr;                 
         std::unordered_map<int, std::unique_ptr<CFGNode>> nodes;  
 
-        // existing allocator/retriever
         CFGNode* getOrCreate(int lbl, const Node* ast = nullptr) {
             auto it = nodes.find(lbl);
             if (it != nodes.end()) return it->second.get();
@@ -34,14 +32,6 @@ namespace whilec {
             nodes[lbl] = std::make_unique<CFGNode>(lbl, ast);
             return nodes[lbl].get();
         }
-
-        int syntheticLabelCounter = -1;
-
-        CFGNode* getOrCreateSynthetic() {
-            int lbl = syntheticLabelCounter--;
-            return getOrCreate(lbl, nullptr); 
-        }
     };
-
     CFG buildCFG(const Program* root);
-}
+} 

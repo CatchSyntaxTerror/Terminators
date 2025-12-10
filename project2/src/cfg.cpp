@@ -110,23 +110,19 @@ namespace whilec
         {
             CFGNode *header = nodeFor(w, cfg);
 
-            // Build loop body
+            // Build the loop body
             std::vector<CFGNode *> bodyExit;
             CFGNode *bodyEntry = buildCmd(w->body.get(), cfg, bodyExit);
 
-            // True branch: header -> body
+            // True branch
             header->succ.push_back(bodyEntry);
 
-            // Back edges: body -> header
+            // Back edges
             for (CFGNode *b : bodyExit)
                 b->succ.push_back(header);
 
-            // FALSE branch: create distinct AFTER-LOOP exit node
-            CFGNode *after = cfg.getOrCreateSynthetic(); // you add this helper in CFG
-            header->succ.push_back(after);
-
-            // This after-node becomes the exit of the while
-            exits.push_back(after);
+            // False branch
+            exits.push_back(header);
 
             return header;
         }
