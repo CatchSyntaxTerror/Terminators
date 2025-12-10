@@ -83,48 +83,48 @@ v5=10000000000
 ### To time on Risc V:
 ```bash
 time ./wh 100000
-real    1m16.376s
-user    1m16.347s
-sys     0m0.017s
+real    1m13.995s
+user    1m13.974s
+sys     0m0.009s
 ```
 
 ### stress_gcd_sub
 ```bash
 time ./wh 1 100000000
-real    0m0.959s
-user    0m0.949s
-sys     0m0.009s
+real    0m0.935s
+user    0m0.929s
+sys     0m0.005s
 ```
 
 ### stress_gcd_mod
 ```bash
 time ./wh 102334155 102334156
-real    0m0.688s
-user    0m0.683s
-sys     0m0.005s
+real    0m0.672s
+user    0m0.671s
+sys     0m0.001s
 ```
 
 ### stress_prime_count
 ```bash
 time ./wh 10000
-real    0m3.321s
-user    0m3.309s
-sys     0m0.000s
+real    0m3.218s
+user    0m3.216s
+sys     0m0.001s
 ```
 ### stress_factorial_addition:
 ```bash
 time ./wh 12
-real    0m2.960s
-user    0m2.954s
-sys     0m0.004s
+real    0m2.796s
+user    0m2.794s
+sys     0m0.001s
 ```
 
 ### stress_factorial_addition:
 ```bash
 time ./wh 13
-real    0m38.434s
-user    0m38.426s
-sys     0m0.000s
+real    0m36.282s
+user    0m36.270s
+sys     0m0.005s
 ```
 
 ### collatz:
@@ -156,5 +156,20 @@ sys     0m0.004s
 time ./wh 0 1000000
 real    0m11.726s
 user    0m11.721s
+sys     0m0.005s
+```
+
+### dead_while:
+```bash
+time ./wh 1000000000
+real    0m38.777s
+user    0m38.660s
+sys     0m0.001s
+```
+
+### closest_prime:
+```bash
+real    5m21.974s
+user    5m21.967s
 sys     0m0.005s
 ```
